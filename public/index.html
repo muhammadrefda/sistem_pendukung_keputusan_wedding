@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPK Venue Wedding - SAW</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 400px; border-radius: 0.5rem; }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-8">
     <div class="max-w-6xl mx-auto space-y-8">
@@ -75,6 +80,12 @@
             </section>
         </div>
 
+        <!-- Map Visualization -->
+        <section class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Visualisasi Lokasi</h2>
+            <div id="map"></div>
+        </section>
+
         <!-- Tabel Perankingan -->
         <section class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
             <h2 class="text-xl font-semibold mb-4 border-b pb-2">Hasil Perankingan SAW</h2>
@@ -99,7 +110,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/api';
+        const API_URL = '/api';
         
         const weightsInput = {
             price: document.getElementById('w-price'),
@@ -119,6 +130,49 @@
 
         const totalDisplay = document.getElementById('weight-total');
 
+        // Initialize Map
+        const map = L.map('map').setView([-6.29, 106.81], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const markers = L.layerGroup().addTo(map);
+        const homeMarkers = L.layerGroup().addTo(map);
+
+        // Define Icons
+        const homeIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const venueIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const bestIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const HOME_REFDAS = { lat: -6.346833, lng: 106.814806 };
+        const HOME_TIARAS = { lat: -6.295991, lng: 106.863323 };
+
+        L.marker([HOME_REFDAS.lat, HOME_REFDAS.lng], { icon: homeIcon }).bindPopup('Rumah Refda').addTo(homeMarkers);
+        L.marker([HOME_TIARAS.lat, HOME_TIARAS.lng], { icon: homeIcon }).bindPopup('Rumah Tiara').addTo(homeMarkers);
+
         // Update displays and recalculate
         function updateUI() {
             let total = 0;
@@ -131,8 +185,14 @@
             }
             
             totalDisplay.innerText = `Total: ${total}%`;
-            totalDisplay.className = total === 100 ? 'text-sm font-bold mt-2 text-green-600' : 'text-sm font-bold mt-2 text-red-600';
             
+            if (total !== 100) {
+                totalDisplay.className = 'text-sm font-bold mt-2 text-red-600';
+                document.getElementById('results-body').innerHTML = '<tr><td colspan="8" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100% untuk menghitung ranking!</td></tr>';
+                return;
+            }
+
+            totalDisplay.className = 'text-sm font-bold mt-2 text-green-600';
             calculateSAW(weights);
         }
 
@@ -153,8 +213,20 @@
         function renderTable(data) {
             const body = document.getElementById('results-body');
             body.innerHTML = '';
+            markers.clearLayers();
             
+            const group = [];
+            group.push([HOME_REFDAS.lat, HOME_REFDAS.lng]);
+            group.push([HOME_TIARAS.lat, HOME_TIARAS.lng]);
+
             data.forEach((v, i) => {
+                const isBest = i === 0;
+                const marker = L.marker([v.lat, v.lng], { icon: isBest ? bestIcon : venueIcon })
+                    .bindPopup(`<b>${v.name}</b><br>Skor: ${v.score}`)
+                    .addTo(markers);
+                
+                group.push([v.lat, v.lng]);
+
                 const row = `
                     <tr class="${i === 0 ? 'bg-yellow-50 font-semibold' : ''} hover:bg-gray-50">
                         <td class="p-3 border text-center">${i + 1}</td>
@@ -169,6 +241,10 @@
                 `;
                 body.innerHTML += row;
             });
+
+            if (group.length > 2) {
+                map.fitBounds(group);
+            }
         }
 
         // Add Venue
