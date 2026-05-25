@@ -92,6 +92,7 @@
             <table class="w-full text-left text-sm">
                 <thead>
                     <tr class="bg-gray-50">
+                        <th class="p-3 border">Pin</th>
                         <th class="p-3 border">Rank</th>
                         <th class="p-3 border">Nama Venue</th>
                         <th class="p-3 border">Harga</th>
@@ -188,7 +189,7 @@
             
             if (total !== 100) {
                 totalDisplay.className = 'text-sm font-bold mt-2 text-red-600';
-                document.getElementById('results-body').innerHTML = '<tr><td colspan="8" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100% untuk menghitung ranking!</td></tr>';
+                document.getElementById('results-body').innerHTML = '<tr><td colspan="9" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100% untuk menghitung ranking!</td></tr>';
                 return;
             }
 
@@ -221,6 +222,7 @@
 
             data.forEach((v, i) => {
                 const isBest = i === 0;
+                const markerColor = isBest ? 'gold' : 'blue';
                 const marker = L.marker([v.lat, v.lng], { icon: isBest ? bestIcon : venueIcon })
                     .bindPopup(`<b>${v.name}</b><br>Skor: ${v.score}`)
                     .addTo(markers);
@@ -229,6 +231,9 @@
 
                 const row = `
                     <tr class="${i === 0 ? 'bg-yellow-50 font-semibold' : ''} hover:bg-gray-50">
+                        <td class="p-3 border text-center">
+                            <span class="inline-block w-4 h-4 rounded-full shadow-sm border ${isBest ? 'bg-yellow-400' : 'bg-blue-500'}"></span>
+                        </td>
                         <td class="p-3 border text-center">${i + 1}</td>
                         <td class="p-3 border">${v.name}</td>
                         <td class="p-3 border">Rp ${v.price.toLocaleString()}</td>
