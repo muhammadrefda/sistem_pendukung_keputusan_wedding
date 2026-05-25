@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPK Venue Wedding - SAW</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto space-y-8">
+        <header class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Sistem Pendukung Keputusan Venue Pernikahan</h1>
+            <p class="text-gray-600">Metode Simple Additive Weighting (SAW)</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Bobot Kriteria -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Atur Bobot Kriteria (%)</h2>
+                <div class="space-y-4" id="weight-controls">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Harga (Cost): <span id="val-price">20</span>%</label>
+                        <input type="range" id="w-price" class="w-full" min="0" max="100" value="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Refda (Cost): <span id="val-distRefda">20</span>%</label>
+                        <input type="range" id="w-distRefda" class="w-full" min="0" max="100" value="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Tiara (Cost): <span id="val-distTiara">20</span>%</label>
+                        <input type="range" id="w-distTiara" class="w-full" min="0" max="100" value="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Skor Kepraktisan (Benefit): <span id="val-practicality">20</span>%</label>
+                        <input type="range" id="w-practicality" class="w-full" min="0" max="100" value="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Keamanan Parkir (Benefit): <span id="val-parking">20</span>%</label>
+                        <input type="range" id="w-parking" class="w-full" min="0" max="100" value="20">
+                    </div>
+                    <p id="weight-total" class="text-sm font-bold mt-2">Total: 100%</p>
+                </div>
+            </section>
+
+            <!-- Tambah Venue -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Tambah Venue Baru</h2>
+                <form id="venue-form" class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Nama Venue</label>
+                        <input type="text" name="name" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Latitude</label>
+                        <input type="number" step="any" name="lat" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Longitude</label>
+                        <input type="number" step="any" name="lng" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Harga (Rp)</label>
+                        <input type="number" name="price" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Praktis (1-10)</label>
+                        <input type="number" name="practicality" min="1" max="10" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Parkir (1-10)</label>
+                        <input type="number" name="parking" min="1" max="10" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <button type="submit" class="col-span-2 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Simpan Venue</button>
+                </form>
+            </section>
+        </div>
+
+        <!-- Tabel Perankingan -->
+        <section class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Hasil Perankingan SAW</h2>
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="p-3 border">Rank</th>
+                        <th class="p-3 border">Nama Venue</th>
+                        <th class="p-3 border">Harga</th>
+                        <th class="p-3 border">Jarak Refda</th>
+                        <th class="p-3 border">Jarak Tiara</th>
+                        <th class="p-3 border">Praktis</th>
+                        <th class="p-3 border">Parkir</th>
+                        <th class="p-3 border font-bold text-blue-600">Skor Akhir</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        const weightsInput = {
+            price: document.getElementById('w-price'),
+            distRefda: document.getElementById('w-distRefda'),
+            distTiara: document.getElementById('w-distTiara'),
+            practicality: document.getElementById('w-practicality'),
+            parking: document.getElementById('w-parking')
+        };
+
+        const weightValues = {
+            price: document.getElementById('val-price'),
+            distRefda: document.getElementById('val-distRefda'),
+            distTiara: document.getElementById('val-distTiara'),
+            practicality: document.getElementById('val-practicality'),
+            parking: document.getElementById('val-parking')
+        };
+
+        const totalDisplay = document.getElementById('weight-total');
+
+        // Update displays and recalculate
+        function updateUI() {
+            let total = 0;
+            const weights = {};
+            for (const key in weightsInput) {
+                const val = parseInt(weightsInput[key].value);
+                weightValues[key].innerText = val;
+                weights[key] = val / 100;
+                total += val;
+            }
+            
+            totalDisplay.innerText = `Total: ${total}%`;
+            totalDisplay.className = total === 100 ? 'text-sm font-bold mt-2 text-green-600' : 'text-sm font-bold mt-2 text-red-600';
+            
+            calculateSAW(weights);
+        }
+
+        async function calculateSAW(weights) {
+            try {
+                const res = await fetch(`${API_URL}/calculate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ weights })
+                });
+                const data = await res.json();
+                renderTable(data);
+            } catch (err) {
+                console.error('Error calculating SAW:', err);
+            }
+        }
+
+        function renderTable(data) {
+            const body = document.getElementById('results-body');
+            body.innerHTML = '';
+            
+            data.forEach((v, i) => {
+                const row = `
+                    <tr class="${i === 0 ? 'bg-yellow-50 font-semibold' : ''} hover:bg-gray-50">
+                        <td class="p-3 border text-center">${i + 1}</td>
+                        <td class="p-3 border">${v.name}</td>
+                        <td class="p-3 border">Rp ${v.price.toLocaleString()}</td>
+                        <td class="p-3 border">${v.distRefda.toFixed(2)} km</td>
+                        <td class="p-3 border">${v.distTiara.toFixed(2)} km</td>
+                        <td class="p-3 border text-center">${v.practicality}</td>
+                        <td class="p-3 border text-center">${v.parking}</td>
+                        <td class="p-3 border font-bold text-blue-600 text-center">${v.score}</td>
+                    </tr>
+                `;
+                body.innerHTML += row;
+            });
+        }
+
+        // Add Venue
+        document.getElementById('venue-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const venue = Object.fromEntries(formData.entries());
+            
+            // Convert numbers
+            ['lat', 'lng', 'price', 'practicality', 'parking'].forEach(key => venue[key] = parseFloat(venue[key]));
+
+            try {
+                await fetch(`${API_URL}/venues`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(venue)
+                });
+                e.target.reset();
+                updateUI();
+            } catch (err) {
+                alert('Gagal menambah venue');
+            }
+        });
+
+        // Listeners for sliders
+        Object.values(weightsInput).forEach(input => {
+            input.addEventListener('input', updateUI);
+        });
+
+        // Initial Load
+        updateUI();
+    </script>
+</body>
+</html>
