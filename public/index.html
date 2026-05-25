@@ -159,14 +159,28 @@
             shadowSize: [41, 41]
         });
 
-        const bestIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        });
+        // Unique Color Mapping
+        const colorPalette = [
+            { name: 'gold', hex: '#FFD700', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png' },
+            { name: 'blue', hex: '#2A7FFF', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png' },
+            { name: 'green', hex: '#2AD400', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png' },
+            { name: 'orange', hex: '#FF8400', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png' },
+            { name: 'violet', hex: '#9C2BCB', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png' },
+            { name: 'grey', hex: '#7B7B7B', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png' },
+            { name: 'black', hex: '#252525', url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-black.png' }
+        ];
+
+        function getVenueIcon(index) {
+            const color = colorPalette[index % colorPalette.length];
+            return L.icon({
+                iconUrl: color.url,
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+        }
 
         const HOME_REFDAS = { lat: -6.346833, lng: 106.814806 };
         const HOME_TIARAS = { lat: -6.295991, lng: 106.863323 };
@@ -221,9 +235,8 @@
             group.push([HOME_TIARAS.lat, HOME_TIARAS.lng]);
 
             data.forEach((v, i) => {
-                const isBest = i === 0;
-                const markerColor = isBest ? 'gold' : 'blue';
-                const marker = L.marker([v.lat, v.lng], { icon: isBest ? bestIcon : venueIcon })
+                const colorObj = colorPalette[i % colorPalette.length];
+                const marker = L.marker([v.lat, v.lng], { icon: getVenueIcon(i) })
                     .bindPopup(`<b>${v.name}</b><br>Skor: ${v.score}`)
                     .addTo(markers);
                 
@@ -232,7 +245,7 @@
                 const row = `
                     <tr class="${i === 0 ? 'bg-yellow-50 font-semibold' : ''} hover:bg-gray-50">
                         <td class="p-3 border text-center">
-                            <span class="inline-block w-4 h-4 rounded-full shadow-sm border ${isBest ? 'bg-yellow-400' : 'bg-blue-500'}"></span>
+                            <span class="inline-block w-4 h-4 rounded-full shadow-sm border" style="background-color: ${colorObj.hex}"></span>
                         </td>
                         <td class="p-3 border text-center">${i + 1}</td>
                         <td class="p-3 border">${v.name}</td>
