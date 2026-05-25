@@ -92,6 +92,21 @@ export default {
 
         return new Response(JSON.stringify(ranked), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
+
+      if (url.pathname === "/api/resolve-maps" && method === "POST") {
+        const { mapsUrl } = await request.json();
+        try {
+          const response = await fetch(mapsUrl, { redirect: "follow", method: "HEAD" });
+          return new Response(JSON.stringify({ finalUrl: response.url }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: "Failed to resolve URL" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
     }
 
     try {

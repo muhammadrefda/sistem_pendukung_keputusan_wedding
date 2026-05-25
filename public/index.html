@@ -66,15 +66,20 @@
                 <form id="venue-form" class="grid grid-cols-2 gap-4">
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-gray-500 uppercase">Nama Venue</label>
-                        <input type="text" name="name" required class="w-full border rounded p-2 text-sm">
+                        <input type="text" name="name" id="v-name" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div class="col-span-2 bg-blue-50 p-3 rounded border border-blue-100">
+                        <label class="block text-xs font-bold text-blue-600 uppercase">Link Google Maps (Auto-fill Lat/Lng)</label>
+                        <input type="text" id="v-maps-url" placeholder="Paste link maps.app.goo.gl atau google.com/maps..." class="w-full border rounded p-2 text-sm mt-1">
+                        <p id="v-maps-status" class="text-[10px] text-blue-500 mt-1 italic">Tinggal paste link, koordinat akan terisi otomatis.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase">Latitude</label>
-                        <input type="number" step="any" name="lat" required class="w-full border rounded p-2 text-sm">
+                        <input type="number" step="any" name="lat" id="v-lat" required class="w-full border rounded p-2 text-sm bg-gray-50">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase">Longitude</label>
-                        <input type="number" step="any" name="lng" required class="w-full border rounded p-2 text-sm">
+                        <input type="number" step="any" name="lng" id="v-lng" required class="w-full border rounded p-2 text-sm bg-gray-50">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase">Harga (Rp)</label>
@@ -258,6 +263,58 @@
         });
 
         Object.values(weightsInput).forEach(input => input.addEventListener('input', updateUI));
+
+        // Maps URL Resolver
+        const mapsUrlInput = document.getElementById('v-maps-url');
+        const mapsStatus = document.getElementById('v-maps-status');
+        const latInput = document.getElementById('v-lat');
+        const lngInput = document.getElementById('v-lng');
+
+        mapsUrlInput.addEventListener('paste', (e) => {
+            setTimeout(() => handleMapsUrl(mapsUrlInput.value), 100);
+        });
+
+        mapsUrlInput.addEventListener('change', () => handleMapsUrl(mapsUrlInput.value));
+
+        async function handleMapsUrl(url) {
+            if (!url) return;
+            mapsStatus.innerText = '⌛ Sedang mengekstrak koordinat...';
+            mapsStatus.className = 'text-[10px] text-blue-500 mt-1 italic';
+
+            try {
+                let finalUrl = url;
+                // If it's a short URL, resolve it via backend
+                if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps')) {
+                    const res = await fetch(`${API_URL}/resolve-maps`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mapsUrl: url })
+                    });
+                    const data = await res.json();
+                    if (data.finalUrl) finalUrl = data.finalUrl;
+                }
+
+                // Regex for coordinates: @lat,lng or q=lat,lng
+                const coordRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)|q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+                const match = finalUrl.match(coordRegex);
+
+                if (match) {
+                    const lat = match[1] || match[3];
+                    const lng = match[2] || match[4];
+                    latInput.value = lat;
+                    lngInput.value = lng;
+                    mapsStatus.innerText = '✅ Koordinat berhasil diekstrak!';
+                    mapsStatus.className = 'text-[10px] text-green-600 mt-1 font-bold';
+                } else {
+                    mapsStatus.innerText = '❌ Koordinat tidak ditemukan dalam link ini.';
+                    mapsStatus.className = 'text-[10px] text-red-500 mt-1 font-bold';
+                }
+            } catch (err) {
+                mapsStatus.innerText = '❌ Gagal menghubungi server.';
+                mapsStatus.className = 'text-[10px] text-red-500 mt-1 font-bold';
+            }
+        }
+
         updateUI();
     </script>
 </body>
