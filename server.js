@@ -24,15 +24,20 @@ db.serialize(() => {
     lng REAL,
     price REAL,
     practicality INTEGER,
-    parking INTEGER
+    parking INTEGER,
+    capacity INTEGER,
+    worship INTEGER,
+    accessibility INTEGER
   )`);
 
-  const stmt = db.prepare("INSERT INTO venues (name, lat, lng, price, practicality, parking) VALUES (?, ?, ?, ?, ?, ?)");
+  const stmt = db.prepare("INSERT INTO venues (name, lat, lng, price, practicality, parking, capacity, worship, accessibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
   const seedData = [
-    ['Arthama Hotel', -6.1873, 106.8181, 33903500, 5, 9],
-    ['Kinanti House', -6.2841, 106.8445, 33503500, 10, 4],
-    ['Rumah Kayu Ilir', -6.4025, 106.8013, 36353500, 5, 7],
-    ['Masjid Ramlie', -6.1436, 106.8732, 31703500, 4, 8]
+    ['Arthama Hotel', -6.1873, 106.8181, 33903500, 5, 9, 8, 9, 10],
+    ['Kinanti House', -6.2841, 106.8445, 33503500, 10, 4, 7, 6, 8],
+    ['Rumah Kayu Ilir', -6.4025, 106.8013, 36353500, 5, 7, 9, 7, 5],
+    ['Masjid Ramlie', -6.1436, 106.8732, 31703500, 4, 8, 10, 10, 7],
+    ['Rumarasa (Paket Nusantara)', -6.2343, 106.8085, 40000000, 8, 8, 6, 8, 9],
+    ['Rumarasa (Paket Rumarasa)', -6.2343, 106.8085, 30000000, 7, 8, 6, 8, 9]
   ];
   seedData.forEach(data => stmt.run(data));
   stmt.finalize();
@@ -59,9 +64,9 @@ app.get('/api/venues', (req, res) => {
 });
 
 app.post('/api/venues', (req, res) => {
-  const { name, lat, lng, price, practicality, parking } = req.body;
-  db.run(`INSERT INTO venues (name, lat, lng, price, practicality, parking) VALUES (?, ?, ?, ?, ?, ?)`,
-    [name, lat, lng, price, practicality, parking],
+  const { name, lat, lng, price, practicality, parking, capacity, worship, accessibility } = req.body;
+  db.run(`INSERT INTO venues (name, lat, lng, price, practicality, parking, capacity, worship, accessibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [name, lat, lng, price, practicality, parking, capacity, worship, accessibility],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ id: this.lastID });
@@ -69,7 +74,7 @@ app.post('/api/venues', (req, res) => {
 });
 
 app.post('/api/calculate', (req, res) => {
-  const weights = req.body.weights; // { price, distRefda, distTiara, practicality, parking }
+  const weights = req.body.weights; // { price, distRefda, distTiara, practicality, parking, capacity, worship, accessibility }
   
   db.all("SELECT * FROM venues", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -93,7 +98,10 @@ app.post('/api/calculate', (req, res) => {
     };
     const maxs = {
       practicality: Math.max(...processed.map(v => v.practicality)),
-      parking: Math.max(...processed.map(v => v.parking))
+      parking: Math.max(...processed.map(v => v.parking)),
+      capacity: Math.max(...processed.map(v => v.capacity)),
+      worship: Math.max(...processed.map(v => v.worship)),
+      accessibility: Math.max(...processed.map(v => v.accessibility))
     };
 
     const ranked = processed.map(v => {
@@ -103,7 +111,10 @@ app.post('/api/calculate', (req, res) => {
         distRefda: mins.distRefda / v.distRefda,
         distTiara: mins.distTiara / v.distTiara,
         practicality: v.practicality / maxs.practicality,
-        parking: v.parking / maxs.parking
+        parking: v.parking / maxs.parking,
+        capacity: v.capacity / maxs.capacity,
+        worship: v.worship / maxs.worship,
+        accessibility: v.accessibility / maxs.accessibility
       };
 
       // Final Score V_i
@@ -111,7 +122,10 @@ app.post('/api/calculate', (req, res) => {
                     (r.distRefda * weights.distRefda) +
                     (r.distTiara * weights.distTiara) +
                     (r.practicality * weights.practicality) +
-                    (r.parking * weights.parking);
+                    (r.parking * weights.parking) +
+                    (r.capacity * weights.capacity) +
+                    (r.worship * weights.worship) +
+                    (r.accessibility * weights.accessibility);
       
       return { ...v, score: score.toFixed(4) };
     }).sort((a, b) => b.score - a.score);
@@ -120,5 +134,15 @@ app.post('/api/calculate', (req, res) => {
   });
 });
 
-const PORT = 3000;
+app.post('/api/resolve-maps', async (req, res) => {
+  const { mapsUrl } = req.body;
+  try {
+    const response = await fetch(mapsUrl, { redirect: "follow", method: "HEAD" });
+    res.json({ finalUrl: response.url });
+  } catch (e) {
+    res.status(400).json({ error: "Failed to resolve URL" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
