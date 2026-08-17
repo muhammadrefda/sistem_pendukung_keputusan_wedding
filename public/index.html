@@ -1,202 +1,271 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
     <title>SPK Venue Wedding - SAW</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 400px; border-radius: 0.5rem; }
-        .score-hint { font-size: 0.7rem; color: #6b7280; line-height: 1.1; margin-top: 2px; }
+        * { -webkit-tap-highlight-color: transparent; }
+        html { -webkit-text-size-adjust: 100%; }
+        body { touch-action: manipulation; }
+
+        #map { height: 260px; border-radius: 0.5rem; }
+        @media (min-width: 768px) { #map { height: 400px; } }
+
+        .score-hint { font-size: 0.7rem; color: #6b7280; line-height: 1.15; margin-top: 3px; }
+
+        /* Slider: thumb besar biar enak didrag jari */
+        input[type=range] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 28px; background: transparent; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 6px; background: #e5e7eb; border-radius: 999px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 24px; height: 24px; margin-top: -9px;
+            background: #2563eb; border: 3px solid #fff; border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,.3);
+        }
+        input[type=range]::-moz-range-track { height: 6px; background: #e5e7eb; border-radius: 999px; }
+        input[type=range]::-moz-range-thumb {
+            width: 22px; height: 22px; background: #2563eb;
+            border: 3px solid #fff; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+        }
+
+        /* Details/summary: hilangkan marker bawaan, pakai chevron sendiri */
+        summary { list-style: none; cursor: pointer; }
+        summary::-webkit-details-marker { display: none; }
+        summary .chevron { transition: transform .2s; }
+        details[open] > summary .chevron { transform: rotate(180deg); }
+
+        /* Checkbox lebih gede & enak disentuh */
+        .task-check { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: #2563eb; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-8">
-    <div class="max-w-6xl mx-auto space-y-8">
-        <header class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Sistem Pendukung Keputusan Venue Pernikahan</h1>
-            <p class="text-gray-600">Metode Simple Additive Weighting (SAW)</p>
+<body class="bg-gray-100 min-h-screen p-3 sm:p-6 lg:p-8 pb-24 md:pb-8">
+    <div class="max-w-6xl mx-auto flex flex-col gap-4 sm:gap-6 lg:gap-8">
+
+        <header class="text-center px-1">
+            <h1 class="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-800 leading-tight">Sistem Pendukung Keputusan Venue Pernikahan</h1>
+            <p class="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">Metode Simple Additive Weighting (SAW)</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Kontrol: Bobot + Form (collapsible di mobile) -->
+        <div class="order-2 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+
             <!-- Bobot Kriteria -->
-            <section class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Atur Bobot Kriteria (%)</h2>
-                <div class="grid grid-cols-1 gap-4" id="weight-controls">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Harga (Cost): <span id="val-price">11.1</span>%</label>
-                        <input type="range" id="w-price" class="w-full" min="0" max="100" value="11.1" step="0.1">
+            <section class="bg-white rounded-xl shadow-md overflow-hidden">
+                <details id="weights-details" class="group">
+                    <summary class="flex items-center justify-between gap-2 p-4 sm:p-6 sm:pb-3 border-b">
+                        <h2 class="text-base sm:text-xl font-semibold">Atur Bobot Kriteria</h2>
+                        <div class="flex items-center gap-2">
+                            <span id="weight-total-badge" class="text-xs font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">100%</span>
+                            <svg class="chevron w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </summary>
+
+                    <div class="p-4 sm:p-6 pt-4 grid grid-cols-1 gap-3 sm:gap-4" id="weight-controls">
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Harga <span class="text-gray-400">(Cost)</span>: <span id="val-price" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-price" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Jarak Rumah Refda <span class="text-gray-400">(Cost)</span>: <span id="val-distRefda" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-distRefda" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Jarak Rumah Tiara <span class="text-gray-400">(Cost)</span>: <span id="val-distTiara" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-distTiara" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Kepraktisan <span class="text-gray-400">(Benefit)</span>: <span id="val-practicality" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-practicality" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Keamanan Parkir <span class="text-gray-400">(Benefit)</span>: <span id="val-parking" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-parking" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Kapasitas Tamu <span class="text-gray-400">(Benefit)</span>: <span id="val-capacity" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-capacity" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Ibadah &amp; Toilet <span class="text-gray-400">(Benefit)</span>: <span id="val-worship" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-worship" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Aksesibilitas <span class="text-gray-400">(Benefit)</span>: <span id="val-accessibility" class="font-bold text-blue-600">11.1</span>%</label>
+                            <input type="range" id="w-accessibility" min="0" max="100" value="11.1" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700">Jumlah Pax <span class="text-gray-400">(Benefit)</span>: <span id="val-pax" class="font-bold text-blue-600">11.2</span>%</label>
+                            <input type="range" id="w-pax" min="0" max="100" value="11.2" step="0.1">
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 pt-2 border-t">
+                            <p id="weight-total" class="text-sm font-bold">Total: 100%</p>
+                            <button type="button" id="weight-reset" class="text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg px-3 py-2 hover:bg-blue-50 active:bg-blue-100">Reset rata</button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Refda (Cost): <span id="val-distRefda">11.1</span>%</label>
-                        <input type="range" id="w-distRefda" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Tiara (Cost): <span id="val-distTiara">11.1</span>%</label>
-                        <input type="range" id="w-distTiara" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Skor Kepraktisan (Benefit): <span id="val-practicality">11.1</span>%</label>
-                        <input type="range" id="w-practicality" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Keamanan Parkir (Benefit): <span id="val-parking">11.1</span>%</label>
-                        <input type="range" id="w-parking" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Kapasitas Tamu (Benefit): <span id="val-capacity">11.1</span>%</label>
-                        <input type="range" id="w-capacity" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Ibadah & Toilet (Benefit): <span id="val-worship">11.1</span>%</label>
-                        <input type="range" id="w-worship" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Aksesibilitas (Benefit): <span id="val-accessibility">11.1</span>%</label>
-                        <input type="range" id="w-accessibility" class="w-full" min="0" max="100" value="11.1" step="0.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Jumlah Pax (Benefit): <span id="val-pax">11.2</span>%</label>
-                        <input type="range" id="w-pax" class="w-full" min="0" max="100" value="11.2" step="0.1">
-                    </div>
-                    <p id="weight-total" class="text-sm font-bold mt-2">Total: 100%</p>
-                </div>
+                </details>
             </section>
 
-            <!-- Tambah Venue -->
-            <section class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4 border-b pb-2" id="venue-form-title">Tambah Venue Baru</h2>
-                <form id="venue-form" class="grid grid-cols-2 gap-4">
-                    <input type="hidden" id="v-id">
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Nama Venue</label>
-                        <input type="text" name="name" id="v-name" required class="w-full border rounded p-2 text-sm">
-                    </div>
-                    <div class="col-span-2 bg-blue-50 p-3 rounded border border-blue-100">
-                        <label class="block text-xs font-bold text-blue-600 uppercase">Link Google Maps (Auto-fill Lat/Lng)</label>
-                        <input type="text" id="v-maps-url" placeholder="Paste link maps.app.goo.gl atau google.com/maps..." class="w-full border rounded p-2 text-sm mt-1">
-                        <p id="v-maps-status" class="text-[10px] text-blue-500 mt-1 italic">Tinggal paste link, koordinat akan terisi otomatis.</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Latitude</label>
-                        <input type="number" step="any" name="lat" id="v-lat" required class="w-full border rounded p-2 text-sm bg-gray-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Longitude</label>
-                        <input type="number" step="any" name="lng" id="v-lng" required class="w-full border rounded p-2 text-sm bg-gray-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Harga (Rp)</label>
-                        <input type="number" name="price" required class="w-full border rounded p-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Praktis (1-10)</label>
-                        <input type="number" name="practicality" min="1" max="10" required class="w-full border rounded p-2 text-sm">
-                        <p class="score-hint">10: All-in (Vendor ready)<br>1: Gedung kosong saja</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Parkir (1-10)</label>
-                        <input type="number" name="parking" min="1" max="10" required class="w-full border rounded p-2 text-sm">
-                        <p class="score-hint">10: Luas & Valet ready<br>1: Parkir liar/pinggir jalan</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Kapasitas (1-10)</label>
-                        <input type="number" name="capacity" min="1" max="10" required class="w-full border rounded p-2 text-sm">
-                        <p class="score-hint">10: Sangat luas/plafon tinggi<br>1: Pas-pasan & pengap</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Pax (Jumlah Tamu)</label>
-                        <input type="number" name="pax" min="1" required class="w-full border rounded p-2 text-sm">
-                        <p class="score-hint">Kapasitas real jumlah tamu yg muat</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Ibadah/Toilet (1-10)</label>
-                        <input type="number" name="worship" min="1" max="10" required class="w-full border rounded p-2 text-sm">
-                        <p class="score-hint">10: Musholla AC & toilet elit<br>1: Terbatas & kurang bersih</p>
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Aksesibilitas (1-10)</label>
-                        <input type="number" name="accessibility" min="1" max="10" required class="w-full border rounded p-2 text-sm">
-                        <p class="score-hint">10: Pinggir jalan raya/Dekat Tol/MRT | 1: Gang sempit/Lokasi tersembunyi</p>
-                    </div>
-                    <div class="col-span-2 flex gap-2">
-                        <button type="submit" id="venue-form-submit" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Simpan Venue</button>
-                        <button type="button" id="venue-form-cancel" class="hidden bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded hover:bg-gray-400 transition">Batal</button>
-                    </div>
-                </form>
+            <!-- Tambah / Edit Venue -->
+            <section class="bg-white rounded-xl shadow-md overflow-hidden">
+                <details id="venue-details" class="group">
+                    <summary class="flex items-center justify-between gap-2 p-4 sm:p-6 sm:pb-3 border-b">
+                        <h2 class="text-base sm:text-xl font-semibold" id="venue-form-title">Tambah Venue Baru</h2>
+                        <svg class="chevron w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+
+                    <form id="venue-form" class="p-4 sm:p-6 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="hidden" id="v-id">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Venue</label>
+                            <input type="text" name="name" id="v-name" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                        </div>
+                        <div class="sm:col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                            <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Link Google Maps <span class="normal-case font-medium">(auto-isi lat/lng)</span></label>
+                            <input type="text" id="v-maps-url" inputmode="url" placeholder="Paste link maps.app.goo.gl..." class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p id="v-maps-status" class="text-[11px] text-blue-500 mt-1.5 italic">Tinggal paste link, koordinat terisi otomatis.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
+                            <input type="number" step="any" inputmode="decimal" name="lat" id="v-lat" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Longitude</label>
+                            <input type="number" step="any" inputmode="decimal" name="lng" id="v-lng" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Harga (Rp)</label>
+                            <input type="number" inputmode="numeric" name="price" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Pax (Jumlah Tamu)</label>
+                            <input type="number" inputmode="numeric" name="pax" min="1" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p class="score-hint">Kapasitas real tamu yang muat</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Praktis (1-10)</label>
+                            <input type="number" inputmode="numeric" name="practicality" min="1" max="10" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p class="score-hint">10: All-in (vendor ready) &middot; 1: gedung kosong</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Parkir (1-10)</label>
+                            <input type="number" inputmode="numeric" name="parking" min="1" max="10" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p class="score-hint">10: luas &amp; valet &middot; 1: parkir pinggir jalan</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kapasitas (1-10)</label>
+                            <input type="number" inputmode="numeric" name="capacity" min="1" max="10" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p class="score-hint">10: luas/plafon tinggi &middot; 1: pas-pasan</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Ibadah/Toilet (1-10)</label>
+                            <input type="number" inputmode="numeric" name="worship" min="1" max="10" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p class="score-hint">10: musholla AC &amp; toilet elit &middot; 1: terbatas</p>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Aksesibilitas (1-10)</label>
+                            <input type="number" inputmode="numeric" name="accessibility" min="1" max="10" required class="w-full border rounded-lg p-2.5 text-base sm:text-sm">
+                            <p class="score-hint">10: pinggir jalan raya/dekat tol/MRT &middot; 1: gang sempit</p>
+                        </div>
+                        <div class="sm:col-span-2 flex gap-2 pt-1">
+                            <button type="submit" id="venue-form-submit" class="flex-1 min-h-[48px] bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition">Simpan Venue</button>
+                            <button type="button" id="venue-form-cancel" class="hidden min-h-[48px] bg-gray-200 text-gray-700 font-bold px-5 rounded-lg hover:bg-gray-300 active:bg-gray-400 transition">Batal</button>
+                        </div>
+                    </form>
+                </details>
             </section>
         </div>
 
-        <!-- Map Visualization -->
-        <section class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Visualisasi Lokasi</h2>
+        <!-- Hasil Perankingan -->
+        <section id="results-section" class="order-3 md:order-4 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            <h2 class="text-base sm:text-xl font-semibold mb-4 pb-2 border-b">Hasil Perankingan SAW</h2>
+
+            <!-- Mobile: kartu -->
+            <div id="results-cards" class="md:hidden flex flex-col gap-3"></div>
+
+            <!-- Desktop: tabel -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-2 border">Pin</th>
+                            <th class="p-2 border text-center">Rank</th>
+                            <th class="p-2 border">Nama Venue</th>
+                            <th class="p-2 border text-center">Harga</th>
+                            <th class="p-2 border text-center">Jarak (R/T)</th>
+                            <th class="p-2 border text-center">Prak.</th>
+                            <th class="p-2 border text-center">Park.</th>
+                            <th class="p-2 border text-center">Kap.</th>
+                            <th class="p-2 border text-center">Ibadah</th>
+                            <th class="p-2 border text-center">Akses</th>
+                            <th class="p-2 border text-center">Pax</th>
+                            <th class="p-2 border font-bold text-blue-600 text-center">Skor</th>
+                            <th class="p-2 border text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Peta -->
+        <section class="order-4 md:order-3 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            <h2 class="text-base sm:text-xl font-semibold mb-4 pb-2 border-b">Visualisasi Lokasi</h2>
             <div id="map"></div>
         </section>
 
-        <!-- Tabel Perankingan -->
-        <section class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Hasil Perankingan SAW</h2>
-            <table class="w-full text-left text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="p-2 border">Pin</th>
-                        <th class="p-2 border text-center">Rank</th>
-                        <th class="p-2 border">Nama Venue</th>
-                        <th class="p-2 border text-center">Harga</th>
-                        <th class="p-2 border text-center">Jarak (K/T)</th>
-                        <th class="p-2 border text-center">Prak.</th>
-                        <th class="p-2 border text-center">Park.</th>
-                        <th class="p-2 border text-center">Kap.</th>
-                        <th class="p-2 border text-center">Ibadah</th>
-                        <th class="p-2 border text-center">Akses</th>
-                        <th class="p-2 border text-center">Pax</th>
-                        <th class="p-2 border font-bold text-blue-600 text-center">Skor</th>
-                        <th class="p-2 border text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="results-body">
-                </tbody>
-            </table>
-        </section>
-
         <!-- Wedding Planner Checklist -->
-        <section class="bg-white p-6 rounded-lg shadow-md">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h2 class="text-xl font-semibold">Wedding Planner Checklist</h2>
-                <span id="task-progress" class="text-sm font-bold text-blue-600"></span>
+        <section class="order-5 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-3 pb-2 border-b">
+                <h2 class="text-base sm:text-xl font-semibold">Wedding Planner</h2>
+                <span id="task-progress" class="text-xs sm:text-sm font-bold text-blue-600"></span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-5">
                 <div id="task-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
             </div>
-            <div id="task-groups" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-            <form id="task-form" class="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t">
-                <input type="text" id="t-category" placeholder="Kategori (mis. Lainnya)" required class="border rounded p-2 text-sm flex-1">
-                <input type="text" id="t-task" placeholder="To-do baru..." required class="border rounded p-2 text-sm flex-[2]">
-                <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition text-sm">Tambah</button>
+            <div id="task-groups" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5"></div>
+            <form id="task-form" class="flex flex-col sm:flex-row gap-2 mt-5 pt-4 border-t">
+                <input type="text" id="t-category" placeholder="Kategori (mis. Lainnya)" required class="border rounded-lg p-2.5 text-base sm:text-sm flex-1">
+                <input type="text" id="t-task" placeholder="To-do baru..." required class="border rounded-lg p-2.5 text-base sm:text-sm flex-[2]">
+                <button type="submit" class="min-h-[48px] bg-blue-600 text-white font-bold px-5 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-sm">Tambah</button>
             </form>
         </section>
     </div>
 
+    <!-- Sticky bar (mobile): total bobot + venue teratas -->
+    <button type="button" id="sticky-bar" class="md:hidden fixed bottom-0 inset-x-0 z-[1000] bg-white/95 backdrop-blur border-t shadow-[0_-2px_10px_rgba(0,0,0,.08)] px-4 py-3 flex items-center justify-between gap-3 text-left">
+        <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wide">Peringkat 1</p>
+            <p id="sticky-top" class="text-sm font-bold text-gray-800 truncate">—</p>
+        </div>
+        <span id="sticky-total" class="text-xs font-bold px-2.5 py-1.5 rounded-full bg-green-100 text-green-700 shrink-0">100%</span>
+    </button>
+
     <script>
         const API_URL = '/api';
-        
-        const weightsInput = {
-            price: document.getElementById('w-price'),
-            distRefda: document.getElementById('w-distRefda'),
-            distTiara: document.getElementById('w-distTiara'),
-            practicality: document.getElementById('w-practicality'),
-            parking: document.getElementById('w-parking'),
-            capacity: document.getElementById('w-capacity'),
-            worship: document.getElementById('w-worship'),
-            accessibility: document.getElementById('w-accessibility'),
-            pax: document.getElementById('w-pax')
-        };
+        const DEFAULT_WEIGHTS = { price: 11.1, distRefda: 11.1, distTiara: 11.1, practicality: 11.1, parking: 11.1, capacity: 11.1, worship: 11.1, accessibility: 11.1, pax: 11.2 };
 
+        const weightsInput = {};
         const weightValues = {};
-        for (const key in weightsInput) weightValues[key] = document.getElementById(`val-${key}`);
+        for (const key in DEFAULT_WEIGHTS) {
+            weightsInput[key] = document.getElementById(`w-${key}`);
+            weightValues[key] = document.getElementById(`val-${key}`);
+        }
 
         const totalDisplay = document.getElementById('weight-total');
+        const totalBadge = document.getElementById('weight-total-badge');
+        const stickyTotal = document.getElementById('sticky-total');
+        const stickyTop = document.getElementById('sticky-top');
 
         const map = L.map('map').setView([-6.29, 106.81], 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
@@ -232,6 +301,10 @@
         L.marker([HOME_REFDAS.lat, HOME_REFDAS.lng], { icon: homeIcon }).bindPopup('Rumah Refda').addTo(homeMarkers);
         L.marker([HOME_TIARAS.lat, HOME_TIARAS.lng], { icon: homeIcon }).bindPopup('Rumah Tiara').addTo(homeMarkers);
 
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
         function updateUI() {
             let total = 0;
             const weights = {};
@@ -241,13 +314,27 @@
                 weights[key] = val / 100;
                 total += val;
             }
-            totalDisplay.innerText = `Total: ${total.toFixed(1)}%`;
-            if (Math.abs(total - 100) > 0.1) {
-                totalDisplay.className = 'text-sm font-bold mt-2 text-red-600';
-                document.getElementById('results-body').innerHTML = '<tr><td colspan="13" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100%!</td></tr>';
+
+            const rounded = total.toFixed(1);
+            const valid = Math.abs(total - 100) <= 0.1;
+
+            totalDisplay.innerText = `Total: ${rounded}%`;
+            totalDisplay.className = `text-sm font-bold ${valid ? 'text-green-600' : 'text-red-600'}`;
+
+            const badgeClass = `text-xs font-bold px-2 py-1 rounded-full ${valid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            totalBadge.className = badgeClass;
+            totalBadge.innerText = `${rounded}%`;
+            stickyTotal.className = `text-xs font-bold px-2.5 py-1.5 rounded-full shrink-0 ${valid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            stickyTotal.innerText = `${rounded}%`;
+
+            if (!valid) {
+                const msg = `Total bobot harus 100% (sekarang ${rounded}%)`;
+                document.getElementById('results-body').innerHTML = `<tr><td colspan="13" class="p-8 text-center text-red-500 font-bold">${msg}</td></tr>`;
+                document.getElementById('results-cards').innerHTML = `<p class="p-6 text-center text-sm text-red-500 font-bold bg-red-50 rounded-lg">${msg}</p>`;
+                stickyTop.innerText = 'Bobot belum 100%';
                 return;
             }
-            totalDisplay.className = 'text-sm font-bold mt-2 text-green-600';
+
             calculateSAW(weights);
         }
 
@@ -257,27 +344,44 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ weights })
                 });
-                renderTable(await res.json());
+                renderResults(await res.json());
             } catch (err) { console.error(err); }
         }
 
         let lastVenueData = [];
 
-        function renderTable(data) {
+        function renderResults(data) {
             lastVenueData = data;
             const body = document.getElementById('results-body');
-            body.innerHTML = ''; markers.clearLayers();
+            const cards = document.getElementById('results-cards');
+            body.innerHTML = ''; cards.innerHTML = ''; markers.clearLayers();
+
+            if (!data.length) {
+                const msg = 'Belum ada venue. Tambahkan lewat form di atas.';
+                body.innerHTML = `<tr><td colspan="13" class="p-8 text-center text-gray-400">${msg}</td></tr>`;
+                cards.innerHTML = `<p class="p-6 text-center text-sm text-gray-400">${msg}</p>`;
+                stickyTop.innerText = '—';
+                return;
+            }
+
             const group = [[HOME_REFDAS.lat, HOME_REFDAS.lng], [HOME_TIARAS.lat, HOME_TIARAS.lng]];
+            let tableHtml = '', cardHtml = '';
 
             data.forEach((v, i) => {
-                L.marker([v.lat, v.lng], { icon: getVenueIcon(i) }).bindPopup(`<b>${v.name}</b>`).addTo(markers);
+                const color = colorPalette[i % colorPalette.length].hex;
+                const name = escapeHtml(v.name);
+                const price = `Rp ${Math.round(v.price / 1000000)}jt`;
+                const dist = `${v.distRefda.toFixed(1)} / ${v.distTiara.toFixed(1)} km`;
+
+                L.marker([v.lat, v.lng], { icon: getVenueIcon(i) }).bindPopup(`<b>${name}</b>`).addTo(markers);
                 group.push([v.lat, v.lng]);
-                body.innerHTML += `
+
+                tableHtml += `
                     <tr class="${i === 0 ? 'bg-yellow-50 font-semibold' : ''} hover:bg-gray-50 border-b">
-                        <td class="p-2 text-center"><span class="inline-block w-3 h-3 rounded-full" style="background-color: ${colorPalette[i % colorPalette.length].hex}"></span></td>
+                        <td class="p-2 text-center"><span class="inline-block w-3 h-3 rounded-full" style="background-color:${color}"></span></td>
                         <td class="p-2 text-center text-xs">${i + 1}</td>
-                        <td class="p-2 text-xs font-bold">${v.name}</td>
-                        <td class="p-2 text-xs text-center">Rp ${Math.round(v.price/1000000)}jt</td>
+                        <td class="p-2 text-xs font-bold">${name}</td>
+                        <td class="p-2 text-xs text-center">${price}</td>
                         <td class="p-2 text-xs text-center">${v.distRefda.toFixed(1)}/${v.distTiara.toFixed(1)}</td>
                         <td class="p-2 text-xs text-center">${v.practicality}</td>
                         <td class="p-2 text-xs text-center">${v.parking}</td>
@@ -291,8 +395,48 @@
                             <button type="button" class="venue-delete text-red-500 hover:underline" data-id="${v.id}">Hapus</button>
                         </td>
                     </tr>`;
+
+                const chip = (label, val) => `
+                    <div class="bg-gray-50 rounded-md py-1.5 text-center">
+                        <p class="text-[9px] uppercase text-gray-400 font-bold leading-none">${label}</p>
+                        <p class="text-sm font-bold text-gray-700 leading-tight mt-0.5">${val}</p>
+                    </div>`;
+
+                cardHtml += `
+                    <article class="border rounded-xl p-3.5 ${i === 0 ? 'border-yellow-300 bg-yellow-50/60 ring-1 ring-yellow-200' : 'border-gray-200'}">
+                        <div class="flex items-start gap-3">
+                            <span class="shrink-0 w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center" style="background-color:${color}">${i + 1}</span>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-bold text-sm text-gray-800 leading-snug break-words">${name}</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">${price} &middot; ${v.pax} pax</p>
+                                <p class="text-xs text-gray-500">Jarak R/T: ${dist}</p>
+                            </div>
+                            <div class="shrink-0 text-right">
+                                <p class="text-[9px] uppercase text-gray-400 font-bold leading-none">Skor</p>
+                                <p class="text-base font-bold text-blue-600 leading-tight">${v.score}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-5 gap-1.5 mt-3">
+                            ${chip('Prak', v.practicality)}
+                            ${chip('Park', v.parking)}
+                            ${chip('Kap', v.capacity)}
+                            ${chip('Ibdh', v.worship)}
+                            ${chip('Akses', v.accessibility)}
+                        </div>
+
+                        <div class="flex gap-2 mt-3">
+                            <button type="button" class="venue-edit flex-1 min-h-[44px] text-sm font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 active:bg-blue-100" data-id="${v.id}">Edit</button>
+                            <button type="button" class="venue-delete flex-1 min-h-[44px] text-sm font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 active:bg-red-100" data-id="${v.id}">Hapus</button>
+                        </div>
+                    </article>`;
             });
-            if (group.length > 2) map.fitBounds(group);
+
+            body.innerHTML = tableHtml;
+            cards.innerHTML = cardHtml;
+            stickyTop.innerText = data[0].name;
+
+            if (group.length > 2) map.fitBounds(group, { padding: [20, 20] });
 
             document.querySelectorAll('.venue-edit').forEach(btn => {
                 btn.addEventListener('click', () => startEditVenue(parseInt(btn.dataset.id)));
@@ -303,6 +447,7 @@
         }
 
         const venueForm = document.getElementById('venue-form');
+        const venueDetails = document.getElementById('venue-details');
         const venueFormTitle = document.getElementById('venue-form-title');
         const venueFormSubmit = document.getElementById('venue-form-submit');
         const venueFormCancel = document.getElementById('venue-form-cancel');
@@ -321,10 +466,11 @@
             venueForm.worship.value = v.worship;
             venueForm.accessibility.value = v.accessibility;
             venueForm.pax.value = v.pax;
-            venueFormTitle.innerText = `Edit Venue: ${v.name}`;
+            venueFormTitle.innerText = 'Edit Venue';
             venueFormSubmit.innerText = 'Update Venue';
             venueFormCancel.classList.remove('hidden');
-            venueForm.scrollIntoView({ behavior: 'smooth' });
+            venueDetails.open = true;
+            venueDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function resetVenueForm() {
@@ -333,12 +479,15 @@
             venueFormTitle.innerText = 'Tambah Venue Baru';
             venueFormSubmit.innerText = 'Simpan Venue';
             venueFormCancel.classList.add('hidden');
+            document.getElementById('v-maps-status').innerText = 'Tinggal paste link, koordinat terisi otomatis.';
+            document.getElementById('v-maps-status').className = 'text-[11px] text-blue-500 mt-1.5 italic';
         }
 
         venueFormCancel.addEventListener('click', resetVenueForm);
 
         async function deleteVenue(id) {
-            if (!confirm('Hapus venue ini?')) return;
+            const v = lastVenueData.find(x => x.id === id);
+            if (!confirm(`Hapus venue "${v ? v.name : id}"?`)) return;
             await fetch(`${API_URL}/venues/${id}`, { method: 'DELETE' });
             updateUI();
         }
@@ -348,16 +497,32 @@
             const venue = Object.fromEntries(new FormData(e.target).entries());
             ['lat', 'lng', 'price', 'practicality', 'parking', 'capacity', 'worship', 'accessibility', 'pax'].forEach(k => venue[k] = parseFloat(venue[k]));
             const id = document.getElementById('v-id').value;
-            if (id) {
-                await fetch(`${API_URL}/venues/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
-            } else {
-                await fetch(`${API_URL}/venues`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
+            venueFormSubmit.disabled = true;
+            venueFormSubmit.innerText = 'Menyimpan...';
+            try {
+                if (id) {
+                    await fetch(`${API_URL}/venues/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
+                } else {
+                    await fetch(`${API_URL}/venues`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
+                }
+            } finally {
+                venueFormSubmit.disabled = false;
+                resetVenueForm();
             }
-            resetVenueForm();
             updateUI();
+            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
         Object.values(weightsInput).forEach(input => input.addEventListener('input', updateUI));
+
+        document.getElementById('weight-reset').addEventListener('click', () => {
+            for (const key in DEFAULT_WEIGHTS) weightsInput[key].value = DEFAULT_WEIGHTS[key];
+            updateUI();
+        });
+
+        document.getElementById('sticky-bar').addEventListener('click', () => {
+            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
 
         // Maps URL Resolver
         const mapsUrlInput = document.getElementById('v-maps-url');
@@ -365,48 +530,40 @@
         const latInput = document.getElementById('v-lat');
         const lngInput = document.getElementById('v-lng');
 
-        mapsUrlInput.addEventListener('paste', (e) => {
-            setTimeout(() => handleMapsUrl(mapsUrlInput.value), 100);
-        });
-
+        mapsUrlInput.addEventListener('paste', () => setTimeout(() => handleMapsUrl(mapsUrlInput.value), 100));
         mapsUrlInput.addEventListener('change', () => handleMapsUrl(mapsUrlInput.value));
 
         async function handleMapsUrl(url) {
             if (!url) return;
-            mapsStatus.innerText = '⌛ Sedang mengekstrak koordinat...';
-            mapsStatus.className = 'text-[10px] text-blue-500 mt-1 italic';
+            mapsStatus.innerText = '⌛ Mengekstrak koordinat...';
+            mapsStatus.className = 'text-[11px] text-blue-500 mt-1.5 italic';
 
             try {
                 let finalUrl = url;
-                // If it's a short URL, resolve it via backend
                 if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps')) {
                     const res = await fetch(`${API_URL}/resolve-maps`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ mapsUrl: url })
                     });
                     const data = await res.json();
                     if (data.finalUrl) finalUrl = data.finalUrl;
                 }
 
-                // Regex for coordinates: @lat,lng or q=lat,lng
                 const coordRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)|q=(-?\d+\.\d+),(-?\d+\.\d+)/;
                 const match = finalUrl.match(coordRegex);
 
                 if (match) {
-                    const lat = match[1] || match[3];
-                    const lng = match[2] || match[4];
-                    latInput.value = lat;
-                    lngInput.value = lng;
+                    latInput.value = match[1] || match[3];
+                    lngInput.value = match[2] || match[4];
                     mapsStatus.innerText = '✅ Koordinat berhasil diekstrak!';
-                    mapsStatus.className = 'text-[10px] text-green-600 mt-1 font-bold';
+                    mapsStatus.className = 'text-[11px] text-green-600 mt-1.5 font-bold';
                 } else {
-                    mapsStatus.innerText = '❌ Koordinat tidak ditemukan dalam link ini.';
-                    mapsStatus.className = 'text-[10px] text-red-500 mt-1 font-bold';
+                    mapsStatus.innerText = '❌ Koordinat tidak ditemukan di link ini.';
+                    mapsStatus.className = 'text-[11px] text-red-500 mt-1.5 font-bold';
                 }
             } catch (err) {
                 mapsStatus.innerText = '❌ Gagal menghubungi server.';
-                mapsStatus.className = 'text-[10px] text-red-500 mt-1 font-bold';
+                mapsStatus.className = 'text-[11px] text-red-500 mt-1.5 font-bold';
             }
         }
 
@@ -423,19 +580,39 @@
                 groups[t.category].push(t);
             });
 
+            const openState = {};
+            document.querySelectorAll('#task-groups details').forEach(d => { openState[d.dataset.category] = d.open; });
+            const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
             const container = document.getElementById('task-groups');
             container.innerHTML = '';
+
             for (const category in groups) {
                 const items = groups[category];
-                const card = document.createElement('div');
-                card.className = 'border rounded-lg p-4';
-                card.innerHTML = `<h3 class="font-bold text-sm text-gray-700 mb-2">${category}</h3>` +
-                    items.map(t => `
-                        <label class="flex items-center gap-2 text-sm py-1 ${t.done ? 'text-gray-400 line-through' : 'text-gray-800'}">
-                            <input type="checkbox" data-id="${t.id}" class="task-check" ${t.done ? 'checked' : ''}>
-                            <span class="flex-1">${t.task}</span>
-                            <button type="button" data-id="${t.id}" class="task-delete text-red-400 hover:text-red-600 text-xs">✕</button>
-                        </label>`).join('');
+                const doneCount = items.filter(t => t.done).length;
+                const allDone = doneCount === items.length;
+                const open = openState[category] !== undefined ? openState[category] : isDesktop;
+
+                const card = document.createElement('details');
+                card.dataset.category = category;
+                card.open = open;
+                card.className = 'border rounded-xl overflow-hidden';
+                card.innerHTML = `
+                    <summary class="flex items-center justify-between gap-2 p-3 bg-gray-50">
+                        <h3 class="font-bold text-sm text-gray-700">${escapeHtml(category)}</h3>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${allDone ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}">${doneCount}/${items.length}</span>
+                            <svg class="chevron w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </summary>
+                    <div class="divide-y">
+                        ${items.map(t => `
+                            <div class="flex items-center gap-3 px-3 py-2.5">
+                                <input type="checkbox" data-id="${t.id}" class="task-check" ${t.done ? 'checked' : ''} aria-label="${escapeHtml(t.task)}">
+                                <span class="flex-1 text-sm leading-snug ${t.done ? 'text-gray-400 line-through' : 'text-gray-800'}">${escapeHtml(t.task)}</span>
+                                <button type="button" data-id="${t.id}" class="task-delete shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100" aria-label="Hapus">&#10005;</button>
+                            </div>`).join('')}
+                    </div>`;
                 container.appendChild(card);
             }
 
@@ -464,18 +641,26 @@
 
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const category = document.getElementById('t-category').value;
-            const task = document.getElementById('t-task').value;
             await fetch(`${API_URL}/tasks`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ category, task })
+                body: JSON.stringify({
+                    category: document.getElementById('t-category').value,
+                    task: document.getElementById('t-task').value
+                })
             });
             e.target.reset();
             loadTasks();
         });
 
-        loadTasks();
+        // Panel bobot & form venue: terbuka di desktop, tertutup di mobile
+        const isDesktopView = window.matchMedia('(min-width: 768px)').matches;
+        document.getElementById('weights-details').open = isDesktopView;
+        venueDetails.open = isDesktopView;
 
+        // Leaflet perlu recalculate ukuran saat orientasi/viewport berubah
+        window.addEventListener('resize', () => map.invalidateSize());
+
+        loadTasks();
         updateUI();
     </script>
 </body>
