@@ -122,6 +122,23 @@ app.post('/api/venues', (req, res) => {
     });
 });
 
+app.put('/api/venues/:id', (req, res) => {
+  const { name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax } = req.body;
+  db.run(`UPDATE venues SET name=?, lat=?, lng=?, price=?, practicality=?, parking=?, capacity=?, worship=?, accessibility=?, pax=? WHERE id=?`,
+    [name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax, req.params.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    });
+});
+
+app.delete('/api/venues/:id', (req, res) => {
+  db.run(`DELETE FROM venues WHERE id=?`, [req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 app.post('/api/calculate', (req, res) => {
   const weights = req.body.weights; // { price, distRefda, distTiara, practicality, parking, capacity, worship, accessibility }
   

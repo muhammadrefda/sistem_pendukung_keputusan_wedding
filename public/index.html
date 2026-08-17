@@ -26,39 +26,39 @@
                 <div class="grid grid-cols-1 gap-4" id="weight-controls">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Harga (Cost): <span id="val-price">11.1</span>%</label>
-                        <input type="range" id="w-price" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-price" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Jarak Rumah Refda (Cost): <span id="val-distRefda">11.1</span>%</label>
-                        <input type="range" id="w-distRefda" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-distRefda" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Jarak Rumah Tiara (Cost): <span id="val-distTiara">11.1</span>%</label>
-                        <input type="range" id="w-distTiara" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-distTiara" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Skor Kepraktisan (Benefit): <span id="val-practicality">11.1</span>%</label>
-                        <input type="range" id="w-practicality" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-practicality" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Keamanan Parkir (Benefit): <span id="val-parking">11.1</span>%</label>
-                        <input type="range" id="w-parking" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-parking" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Kapasitas Tamu (Benefit): <span id="val-capacity">11.1</span>%</label>
-                        <input type="range" id="w-capacity" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-capacity" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Ibadah & Toilet (Benefit): <span id="val-worship">11.1</span>%</label>
-                        <input type="range" id="w-worship" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-worship" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Aksesibilitas (Benefit): <span id="val-accessibility">11.1</span>%</label>
-                        <input type="range" id="w-accessibility" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                        <input type="range" id="w-accessibility" class="w-full" min="0" max="100" value="11.1" step="0.1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Jumlah Pax (Benefit): <span id="val-pax">11.2</span>%</label>
-                        <input type="range" id="w-pax" class="w-full" min="0" max="100" value="11.2" step="0.5">
+                        <input type="range" id="w-pax" class="w-full" min="0" max="100" value="11.2" step="0.1">
                     </div>
                     <p id="weight-total" class="text-sm font-bold mt-2">Total: 100%</p>
                 </div>
@@ -66,8 +66,9 @@
 
             <!-- Tambah Venue -->
             <section class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Tambah Venue Baru</h2>
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2" id="venue-form-title">Tambah Venue Baru</h2>
                 <form id="venue-form" class="grid grid-cols-2 gap-4">
+                    <input type="hidden" id="v-id">
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-gray-500 uppercase">Nama Venue</label>
                         <input type="text" name="name" id="v-name" required class="w-full border rounded p-2 text-sm">
@@ -119,7 +120,10 @@
                         <input type="number" name="accessibility" min="1" max="10" required class="w-full border rounded p-2 text-sm">
                         <p class="score-hint">10: Pinggir jalan raya/Dekat Tol/MRT | 1: Gang sempit/Lokasi tersembunyi</p>
                     </div>
-                    <button type="submit" class="col-span-2 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Simpan Venue</button>
+                    <div class="col-span-2 flex gap-2">
+                        <button type="submit" id="venue-form-submit" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Simpan Venue</button>
+                        <button type="button" id="venue-form-cancel" class="hidden bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded hover:bg-gray-400 transition">Batal</button>
+                    </div>
                 </form>
             </section>
         </div>
@@ -148,6 +152,7 @@
                         <th class="p-2 border text-center">Akses</th>
                         <th class="p-2 border text-center">Pax</th>
                         <th class="p-2 border font-bold text-blue-600 text-center">Skor</th>
+                        <th class="p-2 border text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="results-body">
@@ -239,7 +244,7 @@
             totalDisplay.innerText = `Total: ${total.toFixed(1)}%`;
             if (Math.abs(total - 100) > 0.1) {
                 totalDisplay.className = 'text-sm font-bold mt-2 text-red-600';
-                document.getElementById('results-body').innerHTML = '<tr><td colspan="12" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100%!</td></tr>';
+                document.getElementById('results-body').innerHTML = '<tr><td colspan="13" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100%!</td></tr>';
                 return;
             }
             totalDisplay.className = 'text-sm font-bold mt-2 text-green-600';
@@ -256,7 +261,10 @@
             } catch (err) { console.error(err); }
         }
 
+        let lastVenueData = [];
+
         function renderTable(data) {
+            lastVenueData = data;
             const body = document.getElementById('results-body');
             body.innerHTML = ''; markers.clearLayers();
             const group = [[HOME_REFDAS.lat, HOME_REFDAS.lng], [HOME_TIARAS.lat, HOME_TIARAS.lng]];
@@ -278,17 +286,75 @@
                         <td class="p-2 text-xs text-center">${v.accessibility}</td>
                         <td class="p-2 text-xs text-center">${v.pax}</td>
                         <td class="p-2 text-xs font-bold text-blue-600 text-center">${v.score}</td>
+                        <td class="p-2 text-xs text-center whitespace-nowrap">
+                            <button type="button" class="venue-edit text-blue-600 hover:underline mr-2" data-id="${v.id}">Edit</button>
+                            <button type="button" class="venue-delete text-red-500 hover:underline" data-id="${v.id}">Hapus</button>
+                        </td>
                     </tr>`;
             });
             if (group.length > 2) map.fitBounds(group);
+
+            document.querySelectorAll('.venue-edit').forEach(btn => {
+                btn.addEventListener('click', () => startEditVenue(parseInt(btn.dataset.id)));
+            });
+            document.querySelectorAll('.venue-delete').forEach(btn => {
+                btn.addEventListener('click', () => deleteVenue(parseInt(btn.dataset.id)));
+            });
         }
 
-        document.getElementById('venue-form').addEventListener('submit', async (e) => {
+        const venueForm = document.getElementById('venue-form');
+        const venueFormTitle = document.getElementById('venue-form-title');
+        const venueFormSubmit = document.getElementById('venue-form-submit');
+        const venueFormCancel = document.getElementById('venue-form-cancel');
+
+        function startEditVenue(id) {
+            const v = lastVenueData.find(x => x.id === id);
+            if (!v) return;
+            document.getElementById('v-id').value = v.id;
+            document.getElementById('v-name').value = v.name;
+            document.getElementById('v-lat').value = v.lat;
+            document.getElementById('v-lng').value = v.lng;
+            venueForm.price.value = v.price;
+            venueForm.practicality.value = v.practicality;
+            venueForm.parking.value = v.parking;
+            venueForm.capacity.value = v.capacity;
+            venueForm.worship.value = v.worship;
+            venueForm.accessibility.value = v.accessibility;
+            venueForm.pax.value = v.pax;
+            venueFormTitle.innerText = `Edit Venue: ${v.name}`;
+            venueFormSubmit.innerText = 'Update Venue';
+            venueFormCancel.classList.remove('hidden');
+            venueForm.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetVenueForm() {
+            venueForm.reset();
+            document.getElementById('v-id').value = '';
+            venueFormTitle.innerText = 'Tambah Venue Baru';
+            venueFormSubmit.innerText = 'Simpan Venue';
+            venueFormCancel.classList.add('hidden');
+        }
+
+        venueFormCancel.addEventListener('click', resetVenueForm);
+
+        async function deleteVenue(id) {
+            if (!confirm('Hapus venue ini?')) return;
+            await fetch(`${API_URL}/venues/${id}`, { method: 'DELETE' });
+            updateUI();
+        }
+
+        venueForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const venue = Object.fromEntries(new FormData(e.target).entries());
             ['lat', 'lng', 'price', 'practicality', 'parking', 'capacity', 'worship', 'accessibility', 'pax'].forEach(k => venue[k] = parseFloat(venue[k]));
-            await fetch(`${API_URL}/venues`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
-            e.target.reset(); updateUI();
+            const id = document.getElementById('v-id').value;
+            if (id) {
+                await fetch(`${API_URL}/venues/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
+            } else {
+                await fetch(`${API_URL}/venues`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
+            }
+            resetVenueForm();
+            updateUI();
         });
 
         Object.values(weightsInput).forEach(input => input.addEventListener('input', updateUI));

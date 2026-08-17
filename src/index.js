@@ -23,7 +23,7 @@ export default {
     if (url.pathname.startsWith("/api/")) {
       const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+        "Access-Control-Allow-Methods": "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       };
 
@@ -38,6 +38,19 @@ export default {
         const { name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax } = await request.json();
         await env.DB.prepare("INSERT INTO venues (name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
           .bind(name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax).run();
+        return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const venueIdMatch = url.pathname.match(/^\/api\/venues\/(\d+)$/);
+      if (venueIdMatch && method === "PUT") {
+        const { name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax } = await request.json();
+        await env.DB.prepare("UPDATE venues SET name=?, lat=?, lng=?, price=?, practicality=?, parking=?, capacity=?, worship=?, accessibility=?, pax=? WHERE id=?")
+          .bind(name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax, venueIdMatch[1]).run();
+        return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (venueIdMatch && method === "DELETE") {
+        await env.DB.prepare("DELETE FROM venues WHERE id=?").bind(venueIdMatch[1]).run();
         return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
