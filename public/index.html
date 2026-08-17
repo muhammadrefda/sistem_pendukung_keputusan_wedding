@@ -25,36 +25,40 @@
                 <h2 class="text-xl font-semibold mb-4 border-b pb-2">Atur Bobot Kriteria (%)</h2>
                 <div class="grid grid-cols-1 gap-4" id="weight-controls">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Harga (Cost): <span id="val-price">12.5</span>%</label>
-                        <input type="range" id="w-price" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Harga (Cost): <span id="val-price">11.1</span>%</label>
+                        <input type="range" id="w-price" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Refda (Cost): <span id="val-distRefda">12.5</span>%</label>
-                        <input type="range" id="w-distRefda" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Refda (Cost): <span id="val-distRefda">11.1</span>%</label>
+                        <input type="range" id="w-distRefda" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Tiara (Cost): <span id="val-distTiara">12.5</span>%</label>
-                        <input type="range" id="w-distTiara" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Jarak Rumah Tiara (Cost): <span id="val-distTiara">11.1</span>%</label>
+                        <input type="range" id="w-distTiara" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Skor Kepraktisan (Benefit): <span id="val-practicality">12.5</span>%</label>
-                        <input type="range" id="w-practicality" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Skor Kepraktisan (Benefit): <span id="val-practicality">11.1</span>%</label>
+                        <input type="range" id="w-practicality" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Keamanan Parkir (Benefit): <span id="val-parking">12.5</span>%</label>
-                        <input type="range" id="w-parking" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Keamanan Parkir (Benefit): <span id="val-parking">11.1</span>%</label>
+                        <input type="range" id="w-parking" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Kapasitas Tamu (Benefit): <span id="val-capacity">12.5</span>%</label>
-                        <input type="range" id="w-capacity" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Kapasitas Tamu (Benefit): <span id="val-capacity">11.1</span>%</label>
+                        <input type="range" id="w-capacity" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Ibadah & Toilet (Benefit): <span id="val-worship">12.5</span>%</label>
-                        <input type="range" id="w-worship" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Ibadah & Toilet (Benefit): <span id="val-worship">11.1</span>%</label>
+                        <input type="range" id="w-worship" class="w-full" min="0" max="100" value="11.1" step="0.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Aksesibilitas (Benefit): <span id="val-accessibility">12.5</span>%</label>
-                        <input type="range" id="w-accessibility" class="w-full" min="0" max="100" value="12.5" step="0.5">
+                        <label class="block text-sm font-medium text-gray-700">Aksesibilitas (Benefit): <span id="val-accessibility">11.1</span>%</label>
+                        <input type="range" id="w-accessibility" class="w-full" min="0" max="100" value="11.1" step="0.5">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Jumlah Pax (Benefit): <span id="val-pax">11.2</span>%</label>
+                        <input type="range" id="w-pax" class="w-full" min="0" max="100" value="11.2" step="0.5">
                     </div>
                     <p id="weight-total" class="text-sm font-bold mt-2">Total: 100%</p>
                 </div>
@@ -101,6 +105,11 @@
                         <p class="score-hint">10: Sangat luas/plafon tinggi<br>1: Pas-pasan & pengap</p>
                     </div>
                     <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Pax (Jumlah Tamu)</label>
+                        <input type="number" name="pax" min="1" required class="w-full border rounded p-2 text-sm">
+                        <p class="score-hint">Kapasitas real jumlah tamu yg muat</p>
+                    </div>
+                    <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase">Ibadah/Toilet (1-10)</label>
                         <input type="number" name="worship" min="1" max="10" required class="w-full border rounded p-2 text-sm">
                         <p class="score-hint">10: Musholla AC & toilet elit<br>1: Terbatas & kurang bersih</p>
@@ -137,12 +146,30 @@
                         <th class="p-2 border text-center">Kap.</th>
                         <th class="p-2 border text-center">Ibadah</th>
                         <th class="p-2 border text-center">Akses</th>
+                        <th class="p-2 border text-center">Pax</th>
                         <th class="p-2 border font-bold text-blue-600 text-center">Skor</th>
                     </tr>
                 </thead>
                 <tbody id="results-body">
                 </tbody>
             </table>
+        </section>
+
+        <!-- Wedding Planner Checklist -->
+        <section class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-xl font-semibold">Wedding Planner Checklist</h2>
+                <span id="task-progress" class="text-sm font-bold text-blue-600"></span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+                <div id="task-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+            <div id="task-groups" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <form id="task-form" class="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t">
+                <input type="text" id="t-category" placeholder="Kategori (mis. Lainnya)" required class="border rounded p-2 text-sm flex-1">
+                <input type="text" id="t-task" placeholder="To-do baru..." required class="border rounded p-2 text-sm flex-[2]">
+                <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition text-sm">Tambah</button>
+            </form>
         </section>
     </div>
 
@@ -157,7 +184,8 @@
             parking: document.getElementById('w-parking'),
             capacity: document.getElementById('w-capacity'),
             worship: document.getElementById('w-worship'),
-            accessibility: document.getElementById('w-accessibility')
+            accessibility: document.getElementById('w-accessibility'),
+            pax: document.getElementById('w-pax')
         };
 
         const weightValues = {};
@@ -211,7 +239,7 @@
             totalDisplay.innerText = `Total: ${total.toFixed(1)}%`;
             if (Math.abs(total - 100) > 0.1) {
                 totalDisplay.className = 'text-sm font-bold mt-2 text-red-600';
-                document.getElementById('results-body').innerHTML = '<tr><td colspan="11" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100%!</td></tr>';
+                document.getElementById('results-body').innerHTML = '<tr><td colspan="12" class="p-8 text-center text-red-500 font-bold">Total Bobot harus 100%!</td></tr>';
                 return;
             }
             totalDisplay.className = 'text-sm font-bold mt-2 text-green-600';
@@ -248,6 +276,7 @@
                         <td class="p-2 text-xs text-center">${v.capacity}</td>
                         <td class="p-2 text-xs text-center">${v.worship}</td>
                         <td class="p-2 text-xs text-center">${v.accessibility}</td>
+                        <td class="p-2 text-xs text-center">${v.pax}</td>
                         <td class="p-2 text-xs font-bold text-blue-600 text-center">${v.score}</td>
                     </tr>`;
             });
@@ -257,7 +286,7 @@
         document.getElementById('venue-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const venue = Object.fromEntries(new FormData(e.target).entries());
-            ['lat', 'lng', 'price', 'practicality', 'parking', 'capacity', 'worship', 'accessibility'].forEach(k => venue[k] = parseFloat(venue[k]));
+            ['lat', 'lng', 'price', 'practicality', 'parking', 'capacity', 'worship', 'accessibility', 'pax'].forEach(k => venue[k] = parseFloat(venue[k]));
             await fetch(`${API_URL}/venues`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(venue) });
             e.target.reset(); updateUI();
         });
@@ -314,6 +343,72 @@
                 mapsStatus.className = 'text-[10px] text-red-500 mt-1 font-bold';
             }
         }
+
+        // Wedding Planner Checklist
+        async function loadTasks() {
+            const res = await fetch(`${API_URL}/tasks`);
+            renderTasks(await res.json());
+        }
+
+        function renderTasks(tasks) {
+            const groups = {};
+            tasks.forEach(t => {
+                if (!groups[t.category]) groups[t.category] = [];
+                groups[t.category].push(t);
+            });
+
+            const container = document.getElementById('task-groups');
+            container.innerHTML = '';
+            for (const category in groups) {
+                const items = groups[category];
+                const card = document.createElement('div');
+                card.className = 'border rounded-lg p-4';
+                card.innerHTML = `<h3 class="font-bold text-sm text-gray-700 mb-2">${category}</h3>` +
+                    items.map(t => `
+                        <label class="flex items-center gap-2 text-sm py-1 ${t.done ? 'text-gray-400 line-through' : 'text-gray-800'}">
+                            <input type="checkbox" data-id="${t.id}" class="task-check" ${t.done ? 'checked' : ''}>
+                            <span class="flex-1">${t.task}</span>
+                            <button type="button" data-id="${t.id}" class="task-delete text-red-400 hover:text-red-600 text-xs">✕</button>
+                        </label>`).join('');
+                container.appendChild(card);
+            }
+
+            const total = tasks.length;
+            const done = tasks.filter(t => t.done).length;
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            document.getElementById('task-progress').innerText = `${done}/${total} selesai (${pct}%)`;
+            document.getElementById('task-progress-bar').style.width = `${pct}%`;
+
+            container.querySelectorAll('.task-check').forEach(cb => {
+                cb.addEventListener('change', async () => {
+                    await fetch(`${API_URL}/tasks/${cb.dataset.id}`, {
+                        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ done: cb.checked })
+                    });
+                    loadTasks();
+                });
+            });
+            container.querySelectorAll('.task-delete').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    await fetch(`${API_URL}/tasks/${btn.dataset.id}`, { method: 'DELETE' });
+                    loadTasks();
+                });
+            });
+        }
+
+        document.getElementById('task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const category = document.getElementById('t-category').value;
+            const task = document.getElementById('t-task').value;
+            await fetch(`${API_URL}/tasks`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category, task })
+            });
+            e.target.reset();
+            loadTasks();
+        });
+
+        loadTasks();
 
         updateUI();
     </script>

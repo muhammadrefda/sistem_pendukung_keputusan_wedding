@@ -35,9 +35,9 @@ export default {
       }
 
       if (url.pathname === "/api/venues" && method === "POST") {
-        const { name, lat, lng, price, practicality, parking, capacity, worship, accessibility } = await request.json();
-        await env.DB.prepare("INSERT INTO venues (name, lat, lng, price, practicality, parking, capacity, worship, accessibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-          .bind(name, lat, lng, price, practicality, parking, capacity, worship, accessibility).run();
+        const { name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax } = await request.json();
+        await env.DB.prepare("INSERT INTO venues (name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+          .bind(name, lat, lng, price, practicality, parking, capacity, worship, accessibility, pax).run();
         return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
@@ -45,7 +45,7 @@ export default {
         const { weights } = await request.json();
         const { results: rows } = await env.DB.prepare("SELECT * FROM venues").all();
 
-        let processed = rows.filter(v => v.price <= 40000000).map(v => ({
+        let processed = rows.filter(v => v.price <= 70000000).map(v => ({
           ...v,
           distRefda: haversine(v.lat, v.lng, HOME_REFDA.lat, HOME_REFDA.lng),
           distTiara: haversine(v.lat, v.lng, HOME_TIARA.lat, HOME_TIARA.lng)
@@ -63,7 +63,8 @@ export default {
           parking: Math.max(...processed.map(v => v.parking)),
           capacity: Math.max(...processed.map(v => v.capacity)),
           worship: Math.max(...processed.map(v => v.worship)),
-          accessibility: Math.max(...processed.map(v => v.accessibility))
+          accessibility: Math.max(...processed.map(v => v.accessibility)),
+          pax: Math.max(...processed.map(v => v.pax))
         };
 
         const ranked = processed.map(v => {
@@ -75,7 +76,8 @@ export default {
             parking: v.parking / maxs.parking,
             capacity: v.capacity / maxs.capacity,
             worship: v.worship / maxs.worship,
-            accessibility: v.accessibility / maxs.accessibility
+            accessibility: v.accessibility / maxs.accessibility,
+            pax: v.pax / maxs.pax
           };
 
           const score = (r.price * weights.price) +
@@ -85,7 +87,8 @@ export default {
                         (r.parking * weights.parking) +
                         (r.capacity * weights.capacity) +
                         (r.worship * weights.worship) +
-                        (r.accessibility * weights.accessibility);
+                        (r.accessibility * weights.accessibility) +
+                        (r.pax * (weights.pax || 0));
           
           return { ...v, score: score.toFixed(4) };
         }).sort((a, b) => b.score - a.score);
@@ -106,6 +109,29 @@ export default {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
+      }
+
+      if (url.pathname === "/api/tasks" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM tasks ORDER BY category, id").all();
+        return new Response(JSON.stringify(results), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (url.pathname === "/api/tasks" && method === "POST") {
+        const { category, task } = await request.json();
+        await env.DB.prepare("INSERT INTO tasks (category, task, done) VALUES (?, ?, 0)").bind(category, task).run();
+        return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const taskIdMatch = url.pathname.match(/^\/api\/tasks\/(\d+)$/);
+      if (taskIdMatch && method === "PATCH") {
+        const { done } = await request.json();
+        await env.DB.prepare("UPDATE tasks SET done = ? WHERE id = ?").bind(done ? 1 : 0, taskIdMatch[1]).run();
+        return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (taskIdMatch && method === "DELETE") {
+        await env.DB.prepare("DELETE FROM tasks WHERE id = ?").bind(taskIdMatch[1]).run();
+        return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
     }
 
