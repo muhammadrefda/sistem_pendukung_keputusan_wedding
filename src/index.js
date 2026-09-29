@@ -130,15 +130,27 @@ export default {
       }
 
       if (url.pathname === "/api/tasks" && method === "POST") {
-        const { category, task } = await request.json();
-        await env.DB.prepare("INSERT INTO tasks (category, task, done) VALUES (?, ?, 0)").bind(category, task).run();
+        const { category, task, pic = 'Bersama', priority = 'Normal', notes = '' } = await request.json();
+        await env.DB.prepare("INSERT INTO tasks (category, task, done, pic, priority, notes) VALUES (?, ?, 0, ?, ?, ?)")
+          .bind(category, task, pic, priority, notes).run();
         return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
       const taskIdMatch = url.pathname.match(/^\/api\/tasks\/(\d+)$/);
       if (taskIdMatch && method === "PATCH") {
-        const { done } = await request.json();
-        await env.DB.prepare("UPDATE tasks SET done = ? WHERE id = ?").bind(done ? 1 : 0, taskIdMatch[1]).run();
+        const body = await request.json();
+        if (body.done !== undefined) {
+          await env.DB.prepare("UPDATE tasks SET done = ? WHERE id = ?").bind(body.done ? 1 : 0, taskIdMatch[1]).run();
+        }
+        if (body.pic !== undefined) {
+          await env.DB.prepare("UPDATE tasks SET pic = ? WHERE id = ?").bind(body.pic, taskIdMatch[1]).run();
+        }
+        if (body.priority !== undefined) {
+          await env.DB.prepare("UPDATE tasks SET priority = ? WHERE id = ?").bind(body.priority, taskIdMatch[1]).run();
+        }
+        if (body.notes !== undefined) {
+          await env.DB.prepare("UPDATE tasks SET notes = ? WHERE id = ?").bind(body.notes, taskIdMatch[1]).run();
+        }
         return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 

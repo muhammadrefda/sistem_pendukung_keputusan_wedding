@@ -233,18 +233,66 @@
         <!-- Wedding Planner Checklist -->
         <section class="order-5 bg-white p-4 sm:p-6 rounded-xl shadow-md">
             <div class="flex flex-wrap justify-between items-center gap-2 mb-3 pb-2 border-b">
-                <h2 class="text-base sm:text-xl font-semibold">Wedding Planner</h2>
+                <div>
+                    <h2 class="text-base sm:text-xl font-semibold text-gray-800">Wedding Planner &amp; Checklist</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Tracking persiapan bersama Refda &amp; Tiara (KUA, Busana, Undangan, Videotron &amp; Rumah Tangga)</p>
+                </div>
                 <span id="task-progress" class="text-xs sm:text-sm font-bold text-blue-600"></span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2 mb-5">
-                <div id="task-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-4 overflow-hidden">
+                <div id="task-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
+
+            <!-- Quick Stat Summary Chips -->
+            <div id="task-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4"></div>
+
+            <!-- Filter Tabs -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 text-xs font-semibold scrollbar-none" id="task-filters">
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-blue-600 text-white border-blue-600 shrink-0" data-filter="all">Semua</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Refda">👨 Refda</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Tiara">👩 Tiara</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Bersama">💑 Bersama</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Urgent">🔥 Urgent</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="pending">⏳ Belum Selesai</button>
+            </div>
+
             <div id="task-groups" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5"></div>
-            <form id="task-form" class="flex flex-col sm:flex-row gap-2 mt-5 pt-4 border-t">
-                <input type="text" id="t-category" placeholder="Kategori (mis. Lainnya)" required class="border rounded-lg p-2.5 text-base sm:text-sm flex-1">
-                <input type="text" id="t-task" placeholder="To-do baru..." required class="border rounded-lg p-2.5 text-base sm:text-sm flex-[2]">
-                <button type="submit" class="min-h-[48px] bg-blue-600 text-white font-bold px-5 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-sm">Tambah</button>
-            </form>
+
+            <!-- Add Task Form Collapsible -->
+            <details class="mt-6 pt-4 border-t group">
+                <summary class="flex items-center justify-between cursor-pointer text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    <span class="flex items-center gap-1.5">+ Tambah To-do Baru</span>
+                    <svg class="chevron w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <form id="task-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mt-3">
+                    <input list="category-suggestions" id="t-category" placeholder="Kategori (mis. Administratif (KUA))..." required class="border rounded-lg p-2.5 text-sm">
+                    <datalist id="category-suggestions">
+                        <option value="Administratif (KUA)"></option>
+                        <option value="Busana &amp; Penampilan"></option>
+                        <option value="Undangan &amp; Digital"></option>
+                        <option value="Videotron &amp; Acara"></option>
+                        <option value="Manpower &amp; Panitia"></option>
+                        <option value="Perlengkapan &amp; Vendor"></option>
+                        <option value="Rumah Tangga &amp; Pasca Nikah"></option>
+                        <option value="Lainnya"></option>
+                    </datalist>
+                    <input type="text" id="t-task" placeholder="Nama to-do / rincian tugas..." required class="border rounded-lg p-2.5 text-sm sm:col-span-2 lg:col-span-3">
+                    <select id="t-pic" class="border rounded-lg p-2.5 text-sm bg-white">
+                        <option value="Bersama">PIC: 💑 Bersama</option>
+                        <option value="Refda">PIC: 👨 Refda</option>
+                        <option value="Tiara">PIC: 👩 Tiara</option>
+                        <option value="Keluarga">PIC: 👥 Keluarga</option>
+                    </select>
+                    <select id="t-priority" class="border rounded-lg p-2.5 text-sm bg-white">
+                        <option value="Normal">Prioritas: Normal</option>
+                        <option value="Urgent">Prioritas: 🔥 Urgent</option>
+                    </select>
+                    <input type="text" id="t-notes" placeholder="Catatan / link / detail (opsional)..." class="border rounded-lg p-2.5 text-sm sm:col-span-2">
+                    <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
+                        <button type="submit" class="min-h-[44px] bg-blue-600 text-white font-bold px-6 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-sm">Simpan To-do</button>
+                    </div>
+                </form>
+            </details>
         </section>
     </div>
 
@@ -591,14 +639,94 @@
         }
 
         // Wedding Planner Checklist
+        let allTasks = [];
+        let currentTaskFilter = 'all';
+
         async function loadTasks() {
-            const res = await fetch(`${API_URL}/tasks`);
-            renderTasks(await res.json());
+            try {
+                const res = await fetch(`${API_URL}/tasks`);
+                allTasks = await res.json();
+                renderTasks();
+            } catch (err) {
+                console.error("Gagal memuat tugas:", err);
+            }
         }
 
-        function renderTasks(tasks) {
+        // Filter tab event handlers
+        document.querySelectorAll('.task-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentTaskFilter = btn.dataset.filter;
+                document.querySelectorAll('.task-filter-btn').forEach(b => {
+                    b.className = 'task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0';
+                });
+                btn.className = 'task-filter-btn px-3 py-1.5 rounded-lg border bg-blue-600 text-white border-blue-600 shrink-0';
+                renderTasks();
+            });
+        });
+
+        function getPicBadge(pic) {
+            switch (pic) {
+                case 'Refda':
+                    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">👨 Refda</span>';
+                case 'Tiara':
+                    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 shrink-0">👩 Tiara</span>';
+                case 'Keluarga':
+                    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 shrink-0">👥 Keluarga</span>';
+                default:
+                    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">💑 Bersama</span>';
+            }
+        }
+
+        function renderTasks() {
+            // Render Stats
+            const total = allTasks.length;
+            const done = allTasks.filter(t => t.done).length;
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            document.getElementById('task-progress').innerText = `${done}/${total} selesai (${pct}%)`;
+            document.getElementById('task-progress-bar').style.width = `${pct}%`;
+
+            const refdaTasks = allTasks.filter(t => t.pic === 'Refda');
+            const tiaraTasks = allTasks.filter(t => t.pic === 'Tiara');
+            const bersamaTasks = allTasks.filter(t => t.pic === 'Bersama');
+            const urgentTasks = allTasks.filter(t => t.priority === 'Urgent');
+
+            const refdaDone = refdaTasks.filter(t => t.done).length;
+            const tiaraDone = tiaraTasks.filter(t => t.done).length;
+            const bersamaDone = bersamaTasks.filter(t => t.done).length;
+            const urgentPending = urgentTasks.filter(t => !t.done).length;
+
+            const statsContainer = document.getElementById('task-stats');
+            if (statsContainer) {
+                statsContainer.innerHTML = `
+                    <div class="bg-blue-50/70 border border-blue-100 rounded-lg p-2 text-center">
+                        <p class="text-[10px] uppercase font-bold text-blue-600">👨 Tugas Refda</p>
+                        <p class="text-sm font-bold text-blue-900 mt-0.5">${refdaDone}/${refdaTasks.length} <span class="text-[11px] font-normal text-blue-600">selesai</span></p>
+                    </div>
+                    <div class="bg-rose-50/70 border border-rose-100 rounded-lg p-2 text-center">
+                        <p class="text-[10px] uppercase font-bold text-rose-600">👩 Tugas Tiara</p>
+                        <p class="text-sm font-bold text-rose-900 mt-0.5">${tiaraDone}/${tiaraTasks.length} <span class="text-[11px] font-normal text-rose-600">selesai</span></p>
+                    </div>
+                    <div class="bg-emerald-50/70 border border-emerald-100 rounded-lg p-2 text-center">
+                        <p class="text-[10px] uppercase font-bold text-emerald-600">💑 Tugas Bersama</p>
+                        <p class="text-sm font-bold text-emerald-900 mt-0.5">${bersamaDone}/${bersamaTasks.length} <span class="text-[11px] font-normal text-emerald-600">selesai</span></p>
+                    </div>
+                    <div class="bg-amber-50/70 border border-amber-100 rounded-lg p-2 text-center">
+                        <p class="text-[10px] uppercase font-bold text-amber-700">🔥 Urgent</p>
+                        <p class="text-sm font-bold text-amber-900 mt-0.5">${urgentPending} <span class="text-[11px] font-normal text-amber-700">pending</span></p>
+                    </div>
+                `;
+            }
+
+            // Filter tasks based on selected filter
+            let filtered = allTasks;
+            if (currentTaskFilter === 'Refda') filtered = allTasks.filter(t => t.pic === 'Refda');
+            else if (currentTaskFilter === 'Tiara') filtered = allTasks.filter(t => t.pic === 'Tiara');
+            else if (currentTaskFilter === 'Bersama') filtered = allTasks.filter(t => t.pic === 'Bersama');
+            else if (currentTaskFilter === 'Urgent') filtered = allTasks.filter(t => t.priority === 'Urgent');
+            else if (currentTaskFilter === 'pending') filtered = allTasks.filter(t => !t.done);
+
             const groups = {};
-            tasks.forEach(t => {
+            filtered.forEach(t => {
                 if (!groups[t.category]) groups[t.category] = [];
                 groups[t.category].push(t);
             });
@@ -610,6 +738,11 @@
             const container = document.getElementById('task-groups');
             container.innerHTML = '';
 
+            if (Object.keys(groups).length === 0) {
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-sm text-gray-500 bg-gray-50 rounded-xl border">Tidak ada tugas pada filter ini.</div>`;
+                return;
+            }
+
             for (const category in groups) {
                 const items = groups[category];
                 const doneCount = items.filter(t => t.done).length;
@@ -619,31 +752,38 @@
                 const card = document.createElement('details');
                 card.dataset.category = category;
                 card.open = open;
-                card.className = 'border rounded-xl overflow-hidden';
+                card.className = 'border rounded-xl overflow-hidden bg-white shadow-sm';
                 card.innerHTML = `
-                    <summary class="flex items-center justify-between gap-2 p-3 bg-gray-50">
+                    <summary class="flex items-center justify-between gap-2 p-3 bg-gray-50 hover:bg-gray-100 transition select-none">
                         <h3 class="font-bold text-sm text-gray-700">${escapeHtml(category)}</h3>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${allDone ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}">${doneCount}/${items.length}</span>
                             <svg class="chevron w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </summary>
-                    <div class="divide-y">
-                        ${items.map(t => `
-                            <div class="flex items-center gap-3 px-3 py-2.5">
-                                <input type="checkbox" data-id="${t.id}" class="task-check" ${t.done ? 'checked' : ''} aria-label="${escapeHtml(t.task)}">
-                                <span class="flex-1 text-sm leading-snug ${t.done ? 'text-gray-400 line-through' : 'text-gray-800'}">${escapeHtml(t.task)}</span>
-                                <button type="button" data-id="${t.id}" class="task-delete shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100" aria-label="Hapus">&#10005;</button>
-                            </div>`).join('')}
+                    <div class="divide-y divide-gray-100">
+                        ${items.map(t => {
+                            const isUrgent = t.priority === 'Urgent';
+                            const urgentBadge = isUrgent ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700 border border-red-200 shrink-0">🔥 Urgent</span>' : '';
+                            const notesHtml = t.notes ? `<p class="text-xs text-gray-500 mt-1 leading-snug break-words"><span class="font-medium text-gray-600">Catatan:</span> ${escapeHtml(t.notes)}</p>` : '';
+                            
+                            return `
+                            <div class="flex items-start gap-3 px-3 py-2.5 hover:bg-gray-50/70 transition">
+                                <input type="checkbox" data-id="${t.id}" class="task-check mt-1" ${t.done ? 'checked' : ''} aria-label="${escapeHtml(t.task)}">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        ${getPicBadge(t.pic)}
+                                        ${urgentBadge}
+                                    </div>
+                                    <p class="text-sm font-medium leading-snug mt-1 ${t.done ? 'text-gray-400 line-through' : 'text-gray-800'} break-words">${escapeHtml(t.task)}</p>
+                                    ${notesHtml}
+                                </div>
+                                <button type="button" data-id="${t.id}" class="task-delete shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition" title="Hapus">&#10005;</button>
+                            </div>`;
+                        }).join('')}
                     </div>`;
                 container.appendChild(card);
             }
-
-            const total = tasks.length;
-            const done = tasks.filter(t => t.done).length;
-            const pct = total ? Math.round((done / total) * 100) : 0;
-            document.getElementById('task-progress').innerText = `${done}/${total} selesai (${pct}%)`;
-            document.getElementById('task-progress-bar').style.width = `${pct}%`;
 
             container.querySelectorAll('.task-check').forEach(cb => {
                 cb.addEventListener('change', async () => {
@@ -656,6 +796,7 @@
             });
             container.querySelectorAll('.task-delete').forEach(btn => {
                 btn.addEventListener('click', async () => {
+                    if (!confirm('Hapus to-do ini?')) return;
                     await fetch(`${API_URL}/tasks/${btn.dataset.id}`, { method: 'DELETE' });
                     loadTasks();
                 });
@@ -664,15 +805,28 @@
 
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await fetch(`${API_URL}/tasks`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    category: document.getElementById('t-category').value,
-                    task: document.getElementById('t-task').value
-                })
-            });
-            e.target.reset();
-            loadTasks();
+            const btn = e.target.querySelector('button[type=submit]');
+            btn.disabled = true;
+            btn.innerText = 'Menyimpan...';
+            try {
+                await fetch(`${API_URL}/tasks`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: document.getElementById('t-category').value.trim(),
+                        task: document.getElementById('t-task').value.trim(),
+                        pic: document.getElementById('t-pic').value,
+                        priority: document.getElementById('t-priority').value,
+                        notes: document.getElementById('t-notes').value.trim()
+                    })
+                });
+                e.target.reset();
+                document.getElementById('t-pic').value = 'Bersama';
+                document.getElementById('t-priority').value = 'Normal';
+                await loadTasks();
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Simpan To-do';
+            }
         });
 
         // Panel bobot & form venue: terbuka di desktop, tertutup di mobile
