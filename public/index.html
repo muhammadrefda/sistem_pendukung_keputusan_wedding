@@ -244,7 +244,21 @@
             </div>
 
             <!-- Quick Stat Summary Chips -->
-            <div id="task-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4"></div>
+            <div id="task-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3"></div>
+
+            <!-- Collapsible Detail Data & Statistik -->
+            <details id="task-stats-details" class="mb-4 bg-gray-50/90 border border-gray-200 rounded-xl overflow-hidden group">
+                <summary class="flex items-center justify-between p-3 cursor-pointer text-xs sm:text-sm font-bold text-gray-700 hover:bg-gray-100 transition select-none">
+                    <span class="flex items-center gap-1.5">📊 Detail Statistik &amp; Progres Data</span>
+                    <div class="flex items-center gap-2">
+                        <span id="stats-summary-badge" class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">Buka rincian</span>
+                        <svg class="chevron w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </summary>
+                <div class="p-3.5 pt-2 border-t space-y-3 text-xs" id="task-stats-content">
+                    <!-- Populated dynamically by renderStatsDetails() -->
+                </div>
+            </details>
 
             <!-- Filter Tabs -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 text-xs font-semibold scrollbar-none" id="task-filters">
@@ -253,6 +267,7 @@
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Tiara">👩 Tiara</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Bersama">💑 Bersama</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Urgent">🔥 Urgent</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="notes">📝 Ber-catatan</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="pending">⏳ Belum Selesai</button>
             </div>
 
@@ -717,12 +732,15 @@
                 `;
             }
 
+            renderStatsDetails();
+
             // Filter tasks based on selected filter
             let filtered = allTasks;
             if (currentTaskFilter === 'Refda') filtered = allTasks.filter(t => t.pic === 'Refda');
             else if (currentTaskFilter === 'Tiara') filtered = allTasks.filter(t => t.pic === 'Tiara');
             else if (currentTaskFilter === 'Bersama') filtered = allTasks.filter(t => t.pic === 'Bersama');
             else if (currentTaskFilter === 'Urgent') filtered = allTasks.filter(t => t.priority === 'Urgent');
+            else if (currentTaskFilter === 'notes') filtered = allTasks.filter(t => t.notes && t.notes.trim());
             else if (currentTaskFilter === 'pending') filtered = allTasks.filter(t => !t.done);
 
             const groups = {};
@@ -765,10 +783,16 @@
                         ${items.map(t => {
                             const isUrgent = t.priority === 'Urgent';
                             const urgentBadge = isUrgent ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700 border border-red-200 shrink-0">🔥 Urgent</span>' : '';
-                            const notesHtml = t.notes ? `<p class="text-xs text-gray-500 mt-1 leading-snug break-words"><span class="font-medium text-gray-600">Catatan:</span> ${escapeHtml(t.notes)}</p>` : '';
+                            const hasNotes = t.notes && t.notes.trim();
+                            const notesHtml = hasNotes 
+                                ? `<div class="mt-1.5 flex items-start justify-between gap-2 bg-amber-50/70 border border-amber-200/80 rounded-lg p-2">
+                                     <p class="text-xs text-gray-700 leading-snug break-words flex-1"><span class="font-bold text-amber-900">📝 Catatan:</span> ${escapeHtml(t.notes)}</p>
+                                     <button type="button" data-id="${t.id}" class="task-edit-btn text-[11px] text-blue-600 hover:text-blue-800 font-semibold shrink-0 cursor-pointer">Edit</button>
+                                   </div>`
+                                : `<button type="button" data-id="${t.id}" class="task-edit-btn mt-1 text-[11px] text-blue-600 hover:text-blue-800 font-medium inline-flex items-center gap-1 cursor-pointer">+ Tambah Catatan</button>`;
                             
                             return `
-                            <div class="flex items-start gap-3 px-3 py-2.5 hover:bg-gray-50/70 transition">
+                            <div class="flex items-start gap-2.5 px-3 py-2.5 hover:bg-gray-50/70 transition">
                                 <input type="checkbox" data-id="${t.id}" class="task-check mt-1" ${t.done ? 'checked' : ''} aria-label="${escapeHtml(t.task)}">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex flex-wrap items-center gap-1.5">
@@ -778,7 +802,10 @@
                                     <p class="text-sm font-medium leading-snug mt-1 ${t.done ? 'text-gray-400 line-through' : 'text-gray-800'} break-words">${escapeHtml(t.task)}</p>
                                     ${notesHtml}
                                 </div>
-                                <button type="button" data-id="${t.id}" class="task-delete shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition" title="Hapus">&#10005;</button>
+                                <div class="flex items-center shrink-0">
+                                    <button type="button" data-id="${t.id}" class="task-edit-btn w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition cursor-pointer" title="Edit to-do & catatan">✏️</button>
+                                    <button type="button" data-id="${t.id}" class="task-delete w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition cursor-pointer" title="Hapus">&#10005;</button>
+                                </div>
                             </div>`;
                         }).join('')}
                     </div>`;
@@ -794,12 +821,184 @@
                     loadTasks();
                 });
             });
+
+            container.querySelectorAll('.task-edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openTaskModal(parseInt(btn.dataset.id));
+                });
+            });
+
             container.querySelectorAll('.task-delete').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     if (!confirm('Hapus to-do ini?')) return;
                     await fetch(`${API_URL}/tasks/${btn.dataset.id}`, { method: 'DELETE' });
                     loadTasks();
                 });
+            });
+        }
+
+        function renderStatsDetails() {
+            const container = document.getElementById('task-stats-content');
+            if (!container) return;
+
+            const total = allTasks.length;
+            const done = allTasks.filter(t => t.done).length;
+            const remaining = total - done;
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            const hasNotesCount = allTasks.filter(t => t.notes && t.notes.trim()).length;
+
+            const badge = document.getElementById('stats-summary-badge');
+            if (badge) badge.innerText = `${done}/${total} selesai (${pct}%)`;
+
+            // Group by category for progress
+            const catStats = {};
+            allTasks.forEach(t => {
+                if (!catStats[t.category]) catStats[t.category] = { total: 0, done: 0 };
+                catStats[t.category].total++;
+                if (t.done) catStats[t.category].done++;
+            });
+
+            // PIC stats
+            const pics = ['Refda', 'Tiara', 'Bersama', 'Keluarga'];
+            const picStatsHtml = pics.map(p => {
+                const list = allTasks.filter(t => t.pic === p);
+                const d = list.filter(t => t.done).length;
+                const pPct = list.length ? Math.round((d / list.length) * 100) : 0;
+                let icon = '💑';
+                if (p === 'Refda') icon = '👨';
+                else if (p === 'Tiara') icon = '👩';
+                else if (p === 'Keluarga') icon = '👥';
+
+                return `
+                <div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-xs">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-gray-700">${icon} ${p}</span>
+                        <span class="font-semibold text-gray-500">${d}/${list.length} (${pPct}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: ${pPct}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Category progress bars
+            const catStatsHtml = Object.keys(catStats).map(cat => {
+                const s = catStats[cat];
+                const cPct = s.total ? Math.round((s.done / s.total) * 100) : 0;
+                const isFull = s.done === s.total;
+                return `
+                <div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-xs">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium text-gray-700 truncate pr-2">${escapeHtml(cat)}</span>
+                        <span class="font-bold shrink-0 ${isFull ? 'text-green-600' : 'text-gray-600'}">${s.done}/${s.total} (${cPct}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="${isFull ? 'bg-green-500' : 'bg-blue-500'} h-1.5 rounded-full" style="width: ${cPct}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `
+                <!-- Overview Row -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                    <div class="bg-white p-2.5 rounded-lg border border-gray-100">
+                        <p class="text-[10px] uppercase font-bold text-gray-400">Total Tugas</p>
+                        <p class="text-base font-bold text-gray-800">${total}</p>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-gray-100">
+                        <p class="text-[10px] uppercase font-bold text-green-600">Selesai</p>
+                        <p class="text-base font-bold text-green-700">${done} <span class="text-xs font-normal">(${pct}%)</span></p>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-gray-100">
+                        <p class="text-[10px] uppercase font-bold text-amber-600">Sisa Belum</p>
+                        <p class="text-base font-bold text-amber-700">${remaining}</p>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-gray-100">
+                        <p class="text-[10px] uppercase font-bold text-indigo-600">Ada Catatan</p>
+                        <p class="text-base font-bold text-indigo-700">${hasNotesCount} <span class="text-xs font-normal">tugas</span></p>
+                    </div>
+                </div>
+
+                <!-- Progress Per PIC -->
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2">Progres Per Penanggung Jawab (PIC)</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                        ${picStatsHtml}
+                    </div>
+                </div>
+
+                <!-- Progress Per Kategori -->
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2">Progres Tiap Kategori</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        ${catStatsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Task Edit Modal Handlers
+        const taskModal = document.getElementById('task-modal');
+        const taskEditForm = document.getElementById('task-edit-form');
+        const editTaskId = document.getElementById('edit-task-id');
+        const editTaskName = document.getElementById('edit-task-name');
+        const editTaskNotes = document.getElementById('edit-task-notes');
+        const editTaskPic = document.getElementById('edit-task-pic');
+        const editTaskPriority = document.getElementById('edit-task-priority');
+        const taskModalClose = document.getElementById('task-modal-close');
+        const taskModalCancel = document.getElementById('task-modal-cancel');
+        const taskModalSubmit = document.getElementById('task-modal-submit');
+
+        function openTaskModal(taskId) {
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task) return;
+            editTaskId.value = task.id;
+            editTaskName.value = task.task;
+            editTaskNotes.value = task.notes || '';
+            editTaskPic.value = task.pic || 'Bersama';
+            editTaskPriority.value = task.priority || 'Normal';
+            taskModal.classList.remove('hidden');
+            setTimeout(() => editTaskNotes.focus(), 50);
+        }
+
+        function closeTaskModal() {
+            if (taskModal) taskModal.classList.add('hidden');
+            if (taskEditForm) taskEditForm.reset();
+        }
+
+        if (taskModalClose) taskModalClose.addEventListener('click', closeTaskModal);
+        if (taskModalCancel) taskModalCancel.addEventListener('click', closeTaskModal);
+        if (taskModal) {
+            taskModal.addEventListener('click', (e) => {
+                if (e.target === taskModal) closeTaskModal();
+            });
+        }
+
+        if (taskEditForm) {
+            taskEditForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = editTaskId.value;
+                taskModalSubmit.disabled = true;
+                taskModalSubmit.innerText = 'Menyimpan...';
+                try {
+                    await fetch(`${API_URL}/tasks/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            task: editTaskName.value.trim(),
+                            notes: editTaskNotes.value.trim(),
+                            pic: editTaskPic.value,
+                            priority: editTaskPriority.value
+                        })
+                    });
+                    closeTaskModal();
+                    await loadTasks();
+                } catch (err) {
+                    alert('Gagal menyimpan perubahan: ' + err.message);
+                } finally {
+                    taskModalSubmit.disabled = false;
+                    taskModalSubmit.innerText = 'Simpan Catatan';
+                }
             });
         }
 
@@ -840,5 +1039,51 @@
         loadTasks();
         updateUI();
     </script>
+
+    <!-- Modal Edit To-do & Catatan -->
+    <div id="task-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-[1100] flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border">
+            <div class="flex items-center justify-between p-4 border-b bg-gray-50">
+                <h3 class="font-bold text-base text-gray-800 flex items-center gap-2">
+                    <span>✏️</span> Edit To-do &amp; Catatan
+                </h3>
+                <button type="button" id="task-modal-close" class="text-gray-400 hover:text-gray-600 text-lg w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 cursor-pointer" aria-label="Tutup">&#10005;</button>
+            </div>
+            <form id="task-edit-form" class="p-4 sm:p-5 space-y-3.5">
+                <input type="hidden" id="edit-task-id">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nama To-do</label>
+                    <input type="text" id="edit-task-name" required class="w-full border rounded-lg p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Catatan Tambahan (Notes / Link / No. Kontak)</label>
+                    <textarea id="edit-task-notes" rows="3" placeholder="Tuliskan nomor kontak, link toko, alamat KUA, ukuran baju, progres..." class="w-full border rounded-lg p-2.5 text-sm leading-relaxed"></textarea>
+                    <p class="text-[11px] text-gray-400 mt-1">Bisa diisi link, kontak penjahit/KUA, ukuran baju, progres, dll.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">PIC (Penanggung Jawab)</label>
+                        <select id="edit-task-pic" class="w-full border rounded-lg p-2.5 text-sm bg-white">
+                            <option value="Bersama">💑 Bersama</option>
+                            <option value="Refda">👨 Refda</option>
+                            <option value="Tiara">👩 Tiara</option>
+                            <option value="Keluarga">👥 Keluarga</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Prioritas</label>
+                        <select id="edit-task-priority" class="w-full border rounded-lg p-2.5 text-sm bg-white">
+                            <option value="Normal">Normal</option>
+                            <option value="Urgent">🔥 Urgent</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-2 border-t">
+                    <button type="button" id="task-modal-cancel" class="flex-1 min-h-[44px] bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition text-sm cursor-pointer">Batal</button>
+                    <button type="submit" id="task-modal-submit" class="flex-1 min-h-[44px] bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-sm cursor-pointer">Simpan Catatan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

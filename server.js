@@ -254,10 +254,12 @@ app.post('/api/tasks', (req, res) => {
 });
 
 app.patch('/api/tasks/:id', (req, res) => {
-  const { done, pic, priority, notes } = req.body;
+  const { done, task, category, pic, priority, notes } = req.body;
   const updates = [];
   const params = [];
   if (done !== undefined) { updates.push('done = ?'); params.push(done ? 1 : 0); }
+  if (task !== undefined) { updates.push('task = ?'); params.push(task); }
+  if (category !== undefined) { updates.push('category = ?'); params.push(category); }
   if (pic !== undefined) { updates.push('pic = ?'); params.push(pic); }
   if (priority !== undefined) { updates.push('priority = ?'); params.push(priority); }
   if (notes !== undefined) { updates.push('notes = ?'); params.push(notes); }

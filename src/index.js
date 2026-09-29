@@ -142,6 +142,12 @@ export default {
         if (body.done !== undefined) {
           await env.DB.prepare("UPDATE tasks SET done = ? WHERE id = ?").bind(body.done ? 1 : 0, taskIdMatch[1]).run();
         }
+        if (body.task !== undefined) {
+          await env.DB.prepare("UPDATE tasks SET task = ? WHERE id = ?").bind(body.task, taskIdMatch[1]).run();
+        }
+        if (body.category !== undefined) {
+          await env.DB.prepare("UPDATE tasks SET category = ? WHERE id = ?").bind(body.category, taskIdMatch[1]).run();
+        }
         if (body.pic !== undefined) {
           await env.DB.prepare("UPDATE tasks SET pic = ? WHERE id = ?").bind(body.pic, taskIdMatch[1]).run();
         }
