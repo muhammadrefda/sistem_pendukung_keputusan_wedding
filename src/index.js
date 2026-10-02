@@ -164,6 +164,18 @@ export default {
         await env.DB.prepare("DELETE FROM tasks WHERE id = ?").bind(taskIdMatch[1]).run();
         return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
+
+      if (url.pathname === "/api/comments" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM comments ORDER BY id DESC").all();
+        return new Response(JSON.stringify(results || []), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (url.pathname === "/api/comments" && method === "POST") {
+        const { name, message } = await request.json();
+        if (!name || !message) return new Response(JSON.stringify({ error: "Nama dan pesan wajib diisi" }), { status: 400, headers: corsHeaders });
+        await env.DB.prepare("INSERT INTO comments (name, message) VALUES (?, ?)").bind(name, message).run();
+        return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
     try {

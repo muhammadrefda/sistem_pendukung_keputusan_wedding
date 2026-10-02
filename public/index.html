@@ -243,6 +243,78 @@
                 <div id="task-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
 
+            <!-- KARTU PRIORITAS HARI INI: UNDANGAN DIGITAL & AGENDA WFH REFDA -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 mb-4">
+                <!-- Card 1: Undangan Digital & Barcode QR Percetakan -->
+                <div class="bg-gradient-to-br from-zinc-900 via-zinc-800 to-black text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-zinc-700/80 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-28 h-28 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/10 text-zinc-300 border border-white/20">Siap Cetak Fisik</span>
+                            <span class="text-xs text-emerald-400 font-semibold flex items-center gap-1">● Barcode Ready</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white leading-tight">Undangan Digital &amp; Barcode QR</h3>
+                        <p class="text-xs text-zinc-400 mt-1 leading-relaxed">
+                            Monochrome &middot; Waktu: 08.00–12.30 WIB &middot; GMaps &middot; Shoot Us Games (50rb) &middot; Tanpa Amplop Digital.
+                        </p>
+                    </div>
+                    
+                    <div class="mt-3 pt-3 border-t border-zinc-700/60 flex items-center gap-3">
+                        <div class="bg-white p-1.5 rounded-xl shrink-0 shadow-sm">
+                            <img id="invitation-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fwedding-spk.muhammadrefda.workers.dev%2Finvitation.html" alt="Barcode QR Undangan Digital" class="w-16 h-16 rounded-lg object-contain">
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                            <a href="/invitation.html" target="_blank" class="w-full text-center bg-zinc-100 hover:bg-white text-zinc-950 font-bold py-2 px-3 rounded-lg text-xs transition shadow-xs flex items-center justify-center gap-1.5">
+                                <span>Lihat Web Undangan</span> &rarr;
+                            </a>
+                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https%3A%2F%2Fwedding-spk.muhammadrefda.workers.dev%2Finvitation.html" target="_blank" download="barcode-undangan-refda-tiara.png" class="w-full text-center bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-1.5 px-3 rounded-lg text-[11px] transition border border-zinc-600 flex items-center justify-center gap-1">
+                                <span>📥 Unduh Barcode Gambar</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Agenda Prioritas Refda Hari Ini (WFH) -->
+                <div class="bg-blue-50/80 border border-blue-200 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-blue-600 text-white">Target Refda Hari Ini</span>
+                            <span class="text-xs font-bold text-blue-700">Mumpung WFH 🏡</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-gray-800 leading-tight">Agenda Eksekusi Refda</h3>
+                        <p class="text-xs text-gray-500 mt-1">Biar Tiara bisa cek real-time sambil ada acara di Senci:</p>
+
+                        <ul class="mt-2.5 space-y-1.5 text-xs text-gray-700">
+                            <li class="flex items-center gap-2">
+                                <span class="text-green-600 font-bold">✓</span>
+                                <span class="line-through text-gray-400">Lock Lokasi: FIX KUA Tebet (Wajib KUA Tebet)</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-green-600 font-bold">✓</span>
+                                <span class="line-through text-gray-400">Buat Undangan Digital v1 &amp; Generate Barcode QR</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-blue-600 font-bold">●</span>
+                                <span class="font-medium">Minta pengantar RT/RW (bawa KK, KTP Refda &amp; Tiara)</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-blue-600 font-bold">●</span>
+                                <span class="font-medium">Cek kesehatan catin ke Puskesmas kecamatan</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-blue-600 font-bold">●</span>
+                                <span class="font-medium">Setup Google Form "Shoot Us" Games (Rp 50rb/orang)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-3 pt-2 border-t border-blue-200/60 flex items-center justify-between text-xs">
+                        <span class="text-blue-800 font-semibold text-[11px]">Status: Sedang Berjalan</span>
+                        <button type="button" id="btn-quick-refda" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer text-xs">Filter Tugas Hari Ini &rarr;</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quick Stat Summary Chips -->
             <div id="task-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3"></div>
 
@@ -263,6 +335,7 @@
             <!-- Filter Tabs -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 text-xs font-semibold scrollbar-none" id="task-filters">
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-blue-600 text-white border-blue-600 shrink-0" data-filter="all">Semua</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="today">🎯 Hari Ini (WFH)</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Refda">👨 Refda</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Tiara">👩 Tiara</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Bersama">💑 Bersama</button>
@@ -736,7 +809,9 @@
 
             // Filter tasks based on selected filter
             let filtered = allTasks;
-            if (currentTaskFilter === 'Refda') filtered = allTasks.filter(t => t.pic === 'Refda');
+            if (currentTaskFilter === 'today') {
+                filtered = allTasks.filter(t => (t.pic === 'Refda' && (t.priority === 'Urgent' || !t.done)) || [2, 5, 16, 18].includes(t.id));
+            } else if (currentTaskFilter === 'Refda') filtered = allTasks.filter(t => t.pic === 'Refda');
             else if (currentTaskFilter === 'Tiara') filtered = allTasks.filter(t => t.pic === 'Tiara');
             else if (currentTaskFilter === 'Bersama') filtered = allTasks.filter(t => t.pic === 'Bersama');
             else if (currentTaskFilter === 'Urgent') filtered = allTasks.filter(t => t.priority === 'Urgent');
@@ -1032,6 +1107,17 @@
         const isDesktopView = window.matchMedia('(min-width: 768px)').matches;
         document.getElementById('weights-details').open = isDesktopView;
         venueDetails.open = isDesktopView;
+
+        const btnQuickRefda = document.getElementById('btn-quick-refda');
+        if (btnQuickRefda) {
+            btnQuickRefda.addEventListener('click', () => {
+                const todayBtn = document.querySelector('.task-filter-btn[data-filter="today"]');
+                if (todayBtn) {
+                    todayBtn.click();
+                    document.getElementById('task-groups').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
 
         // Leaflet perlu recalculate ukuran saat orientasi/viewport berubah
         window.addEventListener('resize', () => map.invalidateSize());

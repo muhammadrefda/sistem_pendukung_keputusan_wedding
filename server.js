@@ -279,5 +279,21 @@ app.delete('/api/tasks/:id', (req, res) => {
   });
 });
 
+app.get('/api/comments', (req, res) => {
+  db.all("SELECT * FROM comments ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/comments', (req, res) => {
+  const { name, message } = req.body;
+  if (!name || !message) return res.status(400).json({ error: "Nama dan pesan wajib diisi" });
+  db.run("INSERT INTO comments (name, message) VALUES (?, ?)", [name, message], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ id: this.lastID, success: true });
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
