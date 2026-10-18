@@ -274,43 +274,47 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Agenda Prioritas Refda Hari Ini (WFH) -->
-                <div class="bg-blue-50/80 border border-blue-200 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                <!-- Card 2: Agenda KUA Tebet (4 Nov 2026) & Rundown Hari H -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50/80 border border-blue-200 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-blue-600 text-white">Target Refda Hari Ini</span>
-                            <span class="text-xs font-bold text-blue-700">Mumpung WFH 🏡</span>
+                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-blue-600 text-white">Agenda KUA Tebet</span>
+                            <span class="text-xs font-bold text-blue-700">4 November 2026 📌</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-gray-800 leading-tight">Agenda Eksekusi Refda</h3>
-                        <p class="text-xs text-gray-500 mt-1">Biar Tiara bisa cek real-time sambil ada acara di Senci:</p>
+                        <h3 class="text-base sm:text-lg font-bold text-gray-800 leading-tight">Pemeriksaan Nikah &amp; Berkas Susulan</h3>
+                        <p class="text-xs text-gray-500 mt-1">Berkas wajib yang dibawa tanggal 4 Nov:</p>
 
                         <ul class="mt-2.5 space-y-1.5 text-xs text-gray-700">
                             <li class="flex items-center gap-2">
-                                <span class="text-green-600 font-bold">✓</span>
-                                <span class="line-through text-gray-400">Lock Lokasi: FIX KUA Tebet (Wajib KUA Tebet)</span>
+                                <span class="text-blue-600 font-bold">1.</span>
+                                <span class="font-medium">Fotokopi KTP Ibu Refda</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <span class="text-green-600 font-bold">✓</span>
-                                <span class="line-through text-gray-400">Buat Undangan Digital v1 &amp; Generate Barcode QR</span>
+                                <span class="text-blue-600 font-bold">2.</span>
+                                <span class="font-medium">Fotokopi KTP Bapak Refda <span class="text-gray-400 text-[11px]">(tentatif)</span></span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <span class="text-blue-600 font-bold">●</span>
-                                <span class="font-medium">Minta pengantar RT/RW (bawa KK, KTP Refda &amp; Tiara)</span>
+                                <span class="text-blue-600 font-bold">3.</span>
+                                <span class="font-medium">Materai 10.000 (2 lembar)</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <span class="text-blue-600 font-bold">●</span>
-                                <span class="font-medium">Cek kesehatan catin ke Puskesmas kecamatan</span>
+                                <span class="text-blue-600 font-bold">4.</span>
+                                <span class="font-medium">Fotokopi Kartu Keluarga (KK) Mas Ari</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <span class="text-blue-600 font-bold">●</span>
-                                <span class="font-medium">Setup Google Form "Shoot Us" Games (Rp 50rb/orang)</span>
+                            <li class="flex items-center gap-2 pt-1 border-t border-blue-200/60">
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span class="text-emerald-800 font-semibold">Fitting Baju Akad &amp; Resepsi: Selesai! ✨</span>
                             </li>
                         </ul>
                     </div>
 
-                    <div class="mt-3 pt-2 border-t border-blue-200/60 flex items-center justify-between text-xs">
-                        <span class="text-blue-800 font-semibold text-[11px]">Status: Sedang Berjalan</span>
-                        <button type="button" id="btn-quick-refda" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer text-xs">Filter Tugas Hari Ini &rarr;</button>
+                    <div class="mt-3.5 pt-2.5 border-t border-blue-200/70 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div class="text-[11px] text-gray-600">
+                            <span class="font-bold text-gray-800">Rundown Hari H:</span> Jemput Penghulu <span class="font-bold text-blue-700">08.40</span> &middot; Akad <span class="font-bold text-emerald-700">09.00</span>
+                        </div>
+                        <a href="/wedding-events.ics" download class="text-blue-600 hover:text-blue-800 font-bold text-xs inline-flex items-center gap-1">
+                            <span>📅 Unduh Kalender (.ics)</span> &rarr;
+                        </a>
                     </div>
                 </div>
             </div>
@@ -335,7 +339,7 @@
             <!-- Filter Tabs -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 text-xs font-semibold scrollbar-none" id="task-filters">
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-blue-600 text-white border-blue-600 shrink-0" data-filter="all">Semua</button>
-                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="today">🎯 Hari Ini (WFH)</button>
+                <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="today">🎯 Prioritas (KUA Tebet)</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Refda">👨 Refda</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Tiara">👩 Tiara</button>
                 <button type="button" class="task-filter-btn px-3 py-1.5 rounded-lg border bg-white text-gray-700 hover:bg-gray-50 border-gray-200 shrink-0" data-filter="Bersama">💑 Bersama</button>
@@ -810,7 +814,7 @@
             // Filter tasks based on selected filter
             let filtered = allTasks;
             if (currentTaskFilter === 'today') {
-                filtered = allTasks.filter(t => (t.pic === 'Refda' && (t.priority === 'Urgent' || !t.done)) || [2, 5, 16, 18].includes(t.id));
+                filtered = allTasks.filter(t => (t.task && (t.task.includes('KUA Tebet') || t.task.includes('Penghulu') || t.task.includes('4 Nov'))) || (t.priority === 'Urgent' && !t.done));
             } else if (currentTaskFilter === 'Refda') filtered = allTasks.filter(t => t.pic === 'Refda');
             else if (currentTaskFilter === 'Tiara') filtered = allTasks.filter(t => t.pic === 'Tiara');
             else if (currentTaskFilter === 'Bersama') filtered = allTasks.filter(t => t.pic === 'Bersama');
